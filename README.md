@@ -1,11 +1,3 @@
-# ¡Bienvenido al Cliente HTTP TUI en Go!
-
-Este documento te guiará a través de la instalación, uso y características de nuestra aplicación de cliente HTTP basada en terminal, desarrollada en Go. Si buscas una herramienta ligera y eficiente para probar tus APIs directamente desde tu consola, ¡has llegado al lugar correcto!
-
-A continuación, encontrarás toda la información necesaria para poner en marcha y aprovechar al máximo esta herramienta.
-
----
-
 # TUI HTTP Client en Go
 
 Este proyecto es un cliente HTTP con Interfaz de Usuario en Terminal (TUI) construido con Go, que utiliza las librerías `tview` y `tcell` para la interfaz de usuario, y el paquete estándar `net/http` para realizar las peticiones HTTP.
@@ -87,13 +79,3 @@ Este proyecto utiliza los siguientes módulos externos de Go:
 
 * `github.com/rivo/tview`: Para construir la interfaz de usuario de la terminal.
 * `github.com/gdamore/tcell/v2`: Una potente librería de UI de terminal basada en celdas utilizada por `tview`.
-
----
-
-## ¡Gracias por Descargar y Usar Nuestro Cliente HTTP TUI!
-
-Esperamos que esta herramienta te sea de gran utilidad en tus tareas de desarrollo y depuración de APIs. Nos esforzamos por crear una experiencia de usuario eficiente y agradable directamente en tu terminal.
-
-Si tienes alguna pregunta, sugerencia o encuentras algún problema, no dudes en revisar la sección "Cómo Usar" y "Estructura del Código" para comprender mejor el funcionamiento. Tu feedback es muy valioso para nosotros.
-
-¡Felices peticiones HTTP!
