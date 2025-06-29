@@ -30,12 +30,12 @@ Este proyecto es un cliente HTTP con Interfaz de Usuario en Terminal (TUI) const
 
 1.  **Clona el repositorio**:
     ```bash
-    git clone <URL_DEL_REPOSITORIO>
-    cd <DIRECTORIO_DEL_REPOSITORIO>
+    git clone https://github.com/Lauta-dev/go-http_client-tui.git
+    cd go-http_client-tui
     ```
 2.  **Ejecuta la aplicación**:
     ```bash
-    go run main.go A.go Buttons.go Help.go Params.go ParseParams.go QueryParams.go StatusCodesColors.go parseHeader.go
+    go run .
     ```
     Alternativamente, puedes construir y luego ejecutar:
     ```bash
@@ -60,18 +60,6 @@ La TUI se divide en varias secciones:
 * **Alt+P**: Cambiar a la vista de Path Param.
 * **Alt+H**: Cambiar a la vista de Headers.
 * **Alt+D**: Enviar Petición.
-
-## Estructura del Código
-
-* `main.go`: Contiene la lógica principal de la aplicación, configura el diseño de la TUI, maneja la entrada del usuario y orquesta las peticiones HTTP.
-* `A.go`: Define la función `A()`, que devuelve un `tview.TextArea` para introducir las cabeceras de la petición con un ejemplo de marcador de posición.
-* `Buttons.go`: Contiene la función `Buttons()`, que crea los botones de navegación para cambiar entre las diferentes páginas de entrada (Body, Query Params, Path Param, Headers).
-* `Help.go`: Implementa la función `Help()`, que proporciona el diálogo de ayuda con los atajos de teclado.
-* `Params.go`: Define la función `PathParams()` para el área de entrada de los parámetros de ruta.
-* `ParseParams.go`: Proporciona la función `ParseParams()` para analizar la cadena de parámetros de ruta, ignorando las entradas prefijadas con `#`.
-* `QueryParams.go`: Define la función `QueryParams()` para el área de entrada de los parámetros de consulta.
-* `StatusCodesColors.go`: Contiene la función `StatusCodesColors()` responsable de aplicar formato de color a los códigos de estado HTTP basándose en su rango.
-* `parseHeader.go`: Implementa la función `ParseHeader()`, que analiza una cadena de cabecera en un mapa de pares clave-valor, ignorando los comentarios que comienzan con `#`.
 
 ## Dependencias
 
