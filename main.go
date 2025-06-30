@@ -12,56 +12,24 @@ import (
 	"github.com/rivo/tview"
 )
 
-// Objectivo: Usando tview crear una TUI para el cliente HTTP
-
-/*
-|------------------------------------------------------------------------------------------|
-| Lista de Verbos                      |     STATUS CODE: 200 (OK)                         |
-| 			                               |                                                   |
-| Input URL                            |---------------------------------------------------|
-|--------------------------------------|                                                   |
-|                                      |                                                   |
-| Botones                              |                                                   |
-| [Headers] [Body] [Params]            |                                                   |
-|                                      |           JSON|HTML|Text|Lo que sea               |
-|                                      |                                                   |
-|                                      |                                                   |
-|                                      |                                                   |
-|                                      |                                                   |
-|                                      |                                                   |
-|                                      |                                                   |
-|                                      |                                                   |
-|                                      |																									 |
-|                                      |                                                   |
-|------------------------------------------------------------------------------------------|
-*/
-
 var (
 	view       *tview.TextView
 	footerInfo *tview.Frame
 	app        *tview.Application
 
-	// Variables para la request
-	urlTo        string
-	selectedVerb string
-	body         string
-	header       map[string]string
-	params       []string          // :id
-	queryParams  map[string]string // ?id=
-
 	//
 	responseStatus string // ex 200, OK
 )
 
-func getItems() string {
+func fetch(userUrl string, verb string, h map[string]string, qp map[string]string, p []string, body string) string {
 	pathParam := ""
-	for _, v := range params {
+	for _, v := range p {
 		pathParam += "/" + v
 	}
 
-	urlTo = urlTo + pathParam
+	userUrl = userUrl + pathParam
 
-	u, err := url.Parse(urlTo)
+	u, err := url.Parse(userUrl)
 
 	if err != nil {
 		return "Error al parsear la URL " + err.Error()
@@ -69,7 +37,7 @@ func getItems() string {
 
 	q := u.Query()
 
-	for k, v := range queryParams {
+	for k, v := range qp {
 		if q.Get(k) == "" {
 			q.Add(k, v)
 
@@ -84,12 +52,12 @@ func getItems() string {
 	var post any
 	var isJson = true
 
-	req, err := http.NewRequest(selectedVerb, finalUrl, bytes.NewBuffer([]byte(body)))
+	req, err := http.NewRequest(verb, finalUrl, bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return "Error al crear peticion " + err.Error()
 	}
 
-	for k, v := range header {
+	for k, v := range h {
 		req.Header.Set(k, v)
 	}
 
@@ -131,28 +99,42 @@ func getItems() string {
 	return string(ident)
 }
 
-/*
- ----------
- | 200 OK |
- ----------
-
- -----
- Respuesta
-*/
-
-func updateTime() {
+func updateTime(userUrl string, verb string, h map[string]string, qp map[string]string, p []string, body string) {
 	app.QueueUpdateDraw(func() {
 		view.Clear()
 		fmt.Fprintln(view, "Cargando...")
 	})
-	sal := getItems()
+	data := fetch(userUrl, verb, h, qp, p, body)
 
 	app.QueueUpdateDraw(func() {
 		view.Clear()
-		response := StatusCodesColors(responseStatus) + "\n\n" + string(sal)
+		response := StatusCodesColors(responseStatus) + "\n\n" + string(data)
 		fmt.Fprintln(view, response)
 	})
 
+}
+
+func SendInfo(
+	formInput *tview.InputField,
+	dropdown *tview.DropDown,
+	bodyContent *tview.TextArea,
+	headerPage *tview.TextArea,
+	queryParamPage *tview.TextArea,
+	pathParamPage *tview.TextArea,
+	switchPage *tview.Pages,
+
+) {
+	url := formInput.GetText()
+	_, v := dropdown.GetCurrentOption()
+	selectedVerb := v
+	body := bodyContent.GetText()
+	header := ParseHeader(headerPage.GetText())
+	queryParams := ParseHeader(queryParamPage.GetText())
+	params := ParseParams(pathParamPage.GetText())
+
+	switchPage.SwitchToPage("response")
+
+	go updateTime(url, selectedVerb, header, queryParams, params, body)
 }
 
 func main() {
@@ -166,16 +148,19 @@ func main() {
 	flex := tview.NewFlex()
 	form := tview.NewForm()
 	formInput := tview.NewInputField().SetLabel("URL")
-	formInput.SetText("http://localhost:4000")
+	formInput.SetPlaceholder("http://example.com")
 	bodyContent := tview.NewTextArea().SetPlaceholder("{'name': 'lautaro'}")
+	bodyContent.SetBorder(true).SetTitle(" > Body ").SetTitleAlign(tview.AlignLeft)
 	mainPage := tview.NewPages()
 	switchPage := tview.NewPages()
-	headerBody := A()
-	qParams := QueryParams()
-	pathParam := PathParams()
-	der := tview.NewFlex().SetDirection(tview.FlexRow).AddItem(switchPage, 0, 2, false)
+	headerPage := A()
+	queryParamPage := QueryParams()
+	pathParamPage := PathParams()
 	helpPage := Help()
 	showHelpPage := false
+	der := tview.NewFlex().SetDirection(tview.FlexRow).AddItem(switchPage, 0, 2, false)
+
+	Keys(app, switchPage, der)
 
 	// Aplicar color global de selección (tema de la app)
 	tview.Styles.PrimitiveBackgroundColor = tcell.ColorWhite.TrueColor()
@@ -197,16 +182,7 @@ func main() {
 	form.SetButtonBackgroundColor(tcell.ColorBlack.TrueColor())
 
 	form.AddButton("Send", func() {
-		urlTo = formInput.GetText()
-		_, v := dropdown.GetCurrentOption()
-		selectedVerb = v
-		body = bodyContent.GetText()
-		switchPage.SwitchToPage("response")
-		header = ParseHeader(headerBody.GetText())
-		queryParams = ParseHeader(qParams.GetText())
-		params = ParseParams(pathParam.GetText())
-
-		go updateTime()
+		SendInfo(formInput, dropdown, bodyContent, headerPage, queryParamPage, pathParamPage, switchPage)
 	})
 
 	form.AddButton("Response", func() {
@@ -222,14 +198,15 @@ func main() {
 	view.SetTitle(" Response ")
 	view.SetTitleAlign(tview.AlignLeft)
 	view.SetDynamicColors(true)
-	statusView := tview.NewFrame(der).SetBorders(0, 0, 0, 0, 0, 0).AddText(responseStatus, true, tview.AlignLeft, tcell.ColorWhite)
 
 	switchPage.
 		AddPage("body", bodyContent, true, false).
-		AddPage("response", view, true, false).
-		AddPage("header", headerBody, true, false).
-		AddPage("qp", qParams, true, false).
-		AddPage("pp", pathParam, true, false)
+		AddPage("response", view, true, true).
+		AddPage("header", headerPage, true, false).
+		AddPage("qp", queryParamPage, true, false).
+		AddPage("pp", pathParamPage, true, false)
+
+	statusView := der
 
 	// Parte izq
 	flex.AddItem(
@@ -257,7 +234,6 @@ func main() {
 			}
 		}
 		return event
-
 	})
 
 	dropdown.SetBackgroundColor(tcell.ColorBlack.TrueColor())
@@ -275,6 +251,14 @@ func main() {
 			} else {
 				showHelpPage = true
 				mainPage.SwitchToPage("help")
+			}
+		}
+
+		if event.Key() == tcell.KeyRune && event.Modifiers() == tcell.ModAlt {
+			switch event.Rune() {
+			case 'd':
+				switchPage.SwitchToPage("respone")
+				SendInfo(formInput, dropdown, bodyContent, headerPage, queryParamPage, pathParamPage, switchPage)
 			}
 		}
 		return event
