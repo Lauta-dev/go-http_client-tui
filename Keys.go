@@ -25,8 +25,6 @@ func Keys(app *tview.Application, switchPage *tview.Pages, der *tview.Flex) {
 				switchPage.SwitchToPage("body")
 				app.SetFocus(switchPage)
 
-			case 'd':
-
 			}
 		}
 		return event

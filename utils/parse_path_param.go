@@ -1,8 +1,8 @@
-package main
+package utils
 
 import "strings"
 
-func ParseParams(param string) []string {
+func ParsePathParams(param string) []string {
 	params := []string{}
 
 	ignoreChar := "#"
