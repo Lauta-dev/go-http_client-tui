@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir -p build
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-          go build -o build/http_client_tui-${{ matrix.goos }}-${{ matrix.goarch }} 
+          go build -ldflags="-s -w" -o build/http_client_tui-${{ matrix.goos }}-${{ matrix.goarch }} 
 
       - name: Upload release artifacts
         uses: softprops/action-gh-release@v2
