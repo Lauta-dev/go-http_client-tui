@@ -1,7 +1,6 @@
+<h1 align="center">TUI HTTP Client</h1>
+
 ![Captura de pantalla de la APP](./public/screenshot.png) 
-
-
-<h1 style="text-align: center;">TUI HTTP Client</h1>
 
 Este proyecto es un cliente HTTP con Interfaz de Usuario en Terminal (TUI) construido con Go, que utiliza las librerías `tview` y `tcell` para la interfaz de usuario, y el paquete estándar `net/http` para realizar las peticiones HTTP.
 
