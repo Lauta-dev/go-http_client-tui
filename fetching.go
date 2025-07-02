@@ -41,9 +41,9 @@ func Fetching(userUrl string, verb string, h map[string]string, qp map[string]st
 		return "Error al parsear la URL " + err.Error()
 	}
 
-	addQueryParam(u, qp)
+	finalURL := addQueryParam(u, qp)
 
-	userUrl = u.String()
+	userUrl = finalURL.String()
 
 	req, err := http.NewRequest(verb, userUrl, bytes.NewBuffer([]byte(body)))
 	if err != nil {
