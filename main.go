@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	view          *tview.TextView
+	responseView  *tview.TextView
 	footerInfo    *tview.Frame
 	app           *tview.Application
 	contentToCopy string
@@ -23,16 +23,16 @@ var (
 
 func updateComponent(userUrl string, verb string, h map[string]string, qp map[string]string, p []string, body string) {
 	app.QueueUpdateDraw(func() {
-		view.Clear()
-		fmt.Fprintln(view, "[yellow]Cargando...[#FFFFFF]")
+		responseView.Clear()
+		fmt.Fprintln(responseView, "[yellow]Cargando...[#FFFFFF]")
 	})
 
 	data := Fetching(userUrl, verb, h, qp, p, body)
 
 	app.QueueUpdateDraw(func() {
-		view.Clear()
+		responseView.Clear()
 		response := StatusCodesColors(status) + "\n\n" + data
-		fmt.Fprintln(view, response)
+		fmt.Fprintln(responseView, response)
 	})
 
 }
@@ -66,10 +66,10 @@ func main() {
 	pathParamEditor := ui.PathParamsEditor()
 	form, dropdown, input := ui.Form()
 	helpPage := ui.Help()
+	responseView = ui.ResponseView()
 
 	mainPage := tview.NewPages()
 	workspacePages := tview.NewPages()
-	view = ui.ResponseView()
 
 	showHelpPage := false
 
@@ -84,19 +84,14 @@ func main() {
 
 	workspacePages.
 		AddPage("body", bodyEditor, true, false).
-		AddPage("response", view, true, true).
+		AddPage("response", responseView, true, true).
 		AddPage("header", headerEditor, true, false).
 		AddPage("qp", queryParamEditor, true, false).
 		AddPage("pp", pathParamEditor, true, false)
 
 	// Parte izq
 	flex.AddItem(
-		tview.NewFlex().SetDirection(tview.FlexRow).
-			AddItem(form, 0, 5, false),
-
-		0,
-		1,
-		false)
+		tview.NewFlex().SetDirection(tview.FlexRow).AddItem(form, 0, 5, false), 0, 1, false)
 
 	// Parte der
 	flex.AddItem(der, 0, 1, false)
