@@ -11,24 +11,20 @@ func Form() (*tview.Form, *tview.DropDown, *tview.InputField) {
 	form := tview.NewForm()
 	dropdown := tview.NewDropDown().SetLabel("Método")
 	input := tview.NewInputField().SetLabel("URL")
-
-	form.SetBackgroundColor(tcell.ColorBlack.TrueColor())
-	form.SetFieldBackgroundColor(tcell.ColorDarkSlateGray.TrueColor())
-	form.SetTitleColor(tcell.ColorWhite.TrueColor())
-	form.SetFieldTextColor(tcell.ColorWhite.TrueColor())
-	form.SetBorder(true)
-	form.SetTitle(" > Request ")
-	form.SetTitleAlign(tview.AlignLeft)
-	form.SetButtonBackgroundColor(tcell.ColorBlack.TrueColor())
-
-	dropdown.SetBackgroundColor(tcell.ColorBlack.TrueColor())
-	dropdown.SetFieldBackgroundColor(tcell.ColorBlack.TrueColor())
-	dropdown.SetTitleColor(tcell.ColorWhite.TrueColor())
-	dropdown.SetFieldTextColor(tcell.ColorWhite.TrueColor())
-	dropdown.SetFieldStyle(tcell.StyleDefault.Blink(true))
-
+	input.SetText("http://localhost:4000/items/csv")
 	input.SetPlaceholder("http://example.com")
 	input.SetPlaceholderTextColor(tcell.ColorGray.TrueColor())
+
+	form.SetFieldBackgroundColor(constants.ColorBackground)
+	form.SetFieldTextColor(constants.ColorTextPrimary)
+	form.SetBorder(true)
+	form.SetTitle(" > Request ('F1' para ayuda) ")
+	form.SetTitleAlign(tview.AlignLeft)
+
+	dropdown.SetBackgroundColor(constants.ColorBackground)
+	dropdown.SetFieldBackgroundColor(constants.ColorBackground)
+	dropdown.SetTitleColor(constants.ColorTextPrimary)
+	dropdown.SetFieldTextColor(constants.ColorTextSecondary)
 
 	dropdown.SetOptions(constants.MethodList(), nil)
 	form.AddFormItem(dropdown)

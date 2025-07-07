@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	colors "http_client/const"
 	"http_client/internal/clipboard"
 	"http_client/ui"
 	"http_client/utils"
@@ -13,7 +14,7 @@ import (
 
 var (
 	responseView  *tview.TextView
-	footerInfo    *tview.Frame
+	responseInfo  *tview.TextView
 	app           *tview.Application
 	contentToCopy string
 
@@ -24,14 +25,29 @@ var (
 func updateComponent(userUrl string, verb string, h map[string]string, qp map[string]string, p []string, body string) {
 	app.QueueUpdateDraw(func() {
 		responseView.Clear()
-		fmt.Fprintln(responseView, "[yellow]Cargando...[#FFFFFF]")
+		responseInfo.Clear()
+
+		loadingFormat := fmt.Sprintf("[%s]%s[%s]",
+			colors.ColorTextSecondary.String(),
+			"Cargando...",
+			colors.ColorPrimary.String(),
+		)
+
+		fmt.Fprintln(responseView, loadingFormat)
+		fmt.Fprintln(responseInfo, loadingFormat)
 	})
 
 	data := Fetching(userUrl, verb, h, qp, p, body)
 
 	app.QueueUpdateDraw(func() {
+		// Set footer info
+		responseInfo.Clear()
+		color := StatusCodesColors(status)
+		fmt.Fprintln(responseInfo, color)
+
+		// Set reponse info
 		responseView.Clear()
-		response := StatusCodesColors(status) + "\n\n" + data
+		response := data
 		fmt.Fprintln(responseView, response)
 	})
 
@@ -67,15 +83,20 @@ func main() {
 	form, dropdown, input := ui.Form()
 	helpPage := ui.Help()
 	responseView = ui.ResponseView()
+	responseInfo = ui.ResponseInfo()
 
 	mainPage := tview.NewPages()
 	workspacePages := tview.NewPages()
 
 	showHelpPage := false
 
-	der := tview.NewFlex().SetDirection(tview.FlexRow).AddItem(workspacePages, 0, 2, false)
+	windows := tview.NewFlex().SetDirection(tview.FlexRow).AddItem(workspacePages, 0, 2, false)
 
-	Keys(app, workspacePages, der)
+	responseWindow := tview.NewFlex().SetDirection(tview.FlexRow)
+	responseWindow.AddItem(responseView, 0, 8, false)
+	responseWindow.AddItem(responseInfo, 0, 1, false)
+
+	Keys(app, workspacePages, windows)
 
 	tview.Styles.PrimitiveBackgroundColor = tcell.ColorWhite.TrueColor()
 	tview.Styles.ContrastBackgroundColor = tcell.ColorWhite.TrueColor()
@@ -84,26 +105,22 @@ func main() {
 
 	workspacePages.
 		AddPage("body", bodyEditor, true, false).
-		AddPage("response", responseView, true, true).
+		AddPage("response", responseWindow, true, true).
 		AddPage("header", headerEditor, true, false).
 		AddPage("qp", queryParamEditor, true, false).
 		AddPage("pp", pathParamEditor, true, false)
 
-	// Parte izq
-	flex.AddItem(
-		tview.NewFlex().SetDirection(tview.FlexRow).AddItem(form, 0, 5, false), 0, 1, false)
-
-	// Parte der
-	flex.AddItem(der, 0, 1, false)
+	flex.AddItem(form, 0, 1, false)
+	flex.AddItem(windows, 0, 1, false)
 
 	fullScreen := false
-	der.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+	windows.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 
 		if event.Key() == tcell.KeyRune && event.Modifiers() == tcell.ModAlt {
 			switch event.Rune() {
 			case 'f':
 				fullScreen = !fullScreen
-				der.SetFullScreen(fullScreen)
+				windows.SetFullScreen(fullScreen)
 				return nil
 			}
 		}

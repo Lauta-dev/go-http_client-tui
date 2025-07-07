@@ -2,36 +2,32 @@ package main
 
 import (
 	"fmt"
+	colors "http_client/const"
 	"strconv"
 	"strings"
 )
 
 func StatusCodesColors(statusCode string) string {
-	defaultColor := "[#FFFFFF]"
-	//1xx
-	//a := "[white]"
-	//2xx
-	//b := "[green]"
-	// 3xx
-	//c := "[yellow]"
-	// 4xx/5xx
-	//d := "[red]"
-
 	status := strings.Split(statusCode, " ")
 	code, _ := strconv.Atoi(status[0])
 
 	var color string
 	switch {
+
 	case code >= 100 && code < 200:
-		color = defaultColor
+		color = fmt.Sprintf("[%s::b]", colors.ColorTextPrimary.String())
+
 	case code >= 200 && code < 300:
-		color = "[green]"
+		color = fmt.Sprintf("[%s::b]", colors.ColorSuccess.String())
+
 	case code >= 300 && code < 400:
-		color = "[yellow]"
+		color = fmt.Sprintf("[%s::b]", colors.ColorWarning.String())
+
 	case code >= 400:
-		color = "[red]"
+		color = fmt.Sprintf("[%s::b]", colors.ColorError.String())
+
 	}
 
-	return fmt.Sprintf("%s%s%s", color, statusCode, defaultColor)
+	return fmt.Sprintf("%s%s", color, statusCode)
 
 }
