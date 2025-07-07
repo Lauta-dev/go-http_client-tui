@@ -11,7 +11,6 @@ func Form() (*tview.Form, *tview.DropDown, *tview.InputField) {
 	form := tview.NewForm()
 	dropdown := tview.NewDropDown().SetLabel("Método")
 	input := tview.NewInputField().SetLabel("URL")
-	input.SetText("http://localhost:4000/items/csv")
 	input.SetPlaceholder("http://example.com")
 	input.SetPlaceholderTextColor(tcell.ColorGray.TrueColor())
 

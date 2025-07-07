@@ -54,9 +54,6 @@ func Fetching(userUrl string, verb string, h map[string]string, qp map[string]st
 		req.Header.Set(k, v)
 	}
 
-	// ELIMINAR AL HACER BUILD
-	req.Header.Set("x-api-key", "123")
-
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "Error al enviar peticion " + err.Error()
