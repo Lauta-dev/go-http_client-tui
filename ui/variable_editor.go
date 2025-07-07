@@ -3,7 +3,7 @@ package ui
 import "github.com/rivo/tview"
 
 func VariableEditor() *tview.TextArea {
-	// {{url}}/items
+	// @url/items/@file
 
-	return TextEditor("editor. edito", "asd")
+	return TextEditor("url: http://localhost:4000,\nfile: csv", " > Variables ")
 }
