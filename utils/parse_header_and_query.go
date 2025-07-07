@@ -15,7 +15,7 @@ func ParseHeader(headerStr string) map[string]string {
 	headers := strings.Split(headerStr, ",")
 
 	for _, h := range headers {
-		parts := strings.SplitN(strings.TrimSpace(h), ":", 2)
+		parts := strings.SplitN(strings.TrimSpace(h), ": ", 2)
 
 		if len(parts) == 2 {
 

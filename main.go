@@ -19,10 +19,12 @@ var (
 	contentToCopy string
 
 	//
-	status string // ex 200, OK
+	status      string // ex 200, OK
+	contentType string // Content-Type: Json
+	completeUrl string // URL completa con la que se hace el fetching
 )
 
-func updateComponent(userUrl string, verb string, h map[string]string, qp map[string]string, p []string, body string) {
+func updateComponent(userUrl string, verb string, h map[string]string, qp map[string]string, p []string, body string, tmp string) {
 	app.QueueUpdateDraw(func() {
 		responseView.Clear()
 		responseInfo.Clear()
@@ -37,13 +39,15 @@ func updateComponent(userUrl string, verb string, h map[string]string, qp map[st
 		fmt.Fprintln(responseInfo, loadingFormat)
 	})
 
-	data := Fetching(userUrl, verb, h, qp, p, body)
+	data := Fetching(tmp, verb, h, qp, p, body)
 
 	app.QueueUpdateDraw(func() {
 		// Set footer info
 		responseInfo.Clear()
-		color := StatusCodesColors(status)
-		fmt.Fprintln(responseInfo, color)
+
+		format := fmt.Sprintf("%s, %s \nURL: %s", StatusCodesColors(status), contentType, completeUrl)
+
+		fmt.Fprintln(responseInfo, format)
 
 		// Set reponse info
 		responseView.Clear()
@@ -60,7 +64,7 @@ func SendInfo(
 	headerPage *tview.TextArea,
 	queryParamPage *tview.TextArea,
 	pathParamPage *tview.TextArea,
-
+	varr *tview.TextArea,
 ) {
 	url := formInput.GetText()
 	_, selected := dropdown.GetCurrentOption()
@@ -69,7 +73,9 @@ func SendInfo(
 	queryParams := utils.ParseHeader(queryParamPage.GetText())
 	params := utils.ParsePathParams(pathParamPage.GetText())
 
-	go updateComponent(url, selected, header, queryParams, params, body)
+	tmp := utils.ParseInput(url, utils.ParseHeader(varr.GetText()))
+
+	go updateComponent(url, selected, header, queryParams, params, body, tmp)
 }
 
 func main() {
@@ -84,6 +90,7 @@ func main() {
 	helpPage := ui.Help()
 	responseView = ui.ResponseView()
 	responseInfo = ui.ResponseInfo()
+	variableEditor := ui.VariableEditor()
 
 	mainPage := tview.NewPages()
 	workspacePages := tview.NewPages()
@@ -108,7 +115,8 @@ func main() {
 		AddPage("response", responseWindow, true, true).
 		AddPage("header", headerEditor, true, false).
 		AddPage("qp", queryParamEditor, true, false).
-		AddPage("pp", pathParamEditor, true, false)
+		AddPage("pp", pathParamEditor, true, false).
+		AddPage("var", variableEditor, true, false)
 
 	flex.AddItem(form, 0, 1, false)
 	flex.AddItem(windows, 0, 1, false)
@@ -143,12 +151,10 @@ func main() {
 			switch event.Rune() {
 			case 'd':
 				workspacePages.SwitchToPage("response")
-				SendInfo(input, dropdown, bodyEditor, headerEditor, queryParamEditor, pathParamEditor)
+				SendInfo(input, dropdown, bodyEditor, headerEditor, queryParamEditor, pathParamEditor, variableEditor)
 
 			case 'c':
 				clipboard.Copy(contentToCopy)
-			case 'q':
-				app.Stop()
 			}
 		}
 		return event

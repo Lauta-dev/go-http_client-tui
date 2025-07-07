@@ -72,5 +72,7 @@ func Fetching(userUrl string, verb string, h map[string]string, qp map[string]st
 	json := utils.IndentJson(bytes)
 	status = res.Status
 	contentToCopy = json
+	contentType = res.Header.Get("Content-Type")
+	completeUrl = userUrl
 	return json
 }
