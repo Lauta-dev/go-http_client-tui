@@ -7,7 +7,6 @@ import (
 
 func ResponseInfo() *tview.TextView {
 	responseInfo := tview.NewTextView()
-	responseInfo.SetBackgroundColor(colors.ColorBackground)
 	responseInfo.SetTextColor(colors.ColorTextSecondary)
 	responseInfo.SetBorder(true)
 	responseInfo.SetTitle(" > Response Information ")
