@@ -38,7 +38,9 @@ go build -o http-client .
 | `Alt+Q` | Vista Query Params |
 | `Alt+P` | Vista Path Params |
 | `Alt+H` | Vista Headers |
+| `Alt+J` | Vista Variables |
 | `Alt+D` | Enviar petición |
+| `Alt+N` | Copiar respuesta al portapapeles (X11 y Wayland) |
 | `Ctrl+C` | Salir |
 
 ## 📋 Uso Rápido

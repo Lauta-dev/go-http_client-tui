@@ -22,6 +22,7 @@ func helpFile() string {
 [green::b]Alt+H[-::-]       - Vista Headers
 [green::b]Alt+D[-::-]       - Enviar petición
 [green::b]Alt+J[-::-]       - Vista variables
+[green::b]Alt+N[-::-]       - Copiar petición
 [red::b]Ctrl+C[-::-]      - Salir
 
 > [yellow::b]FORMATO PARA BODY, HEADERS Y QUERY PARAMS[-::-]

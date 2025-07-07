@@ -153,7 +153,7 @@ func main() {
 				workspacePages.SwitchToPage("response")
 				SendInfo(input, dropdown, bodyEditor, headerEditor, queryParamEditor, pathParamEditor, variableEditor)
 
-			case 'c':
+			case 'n':
 				clipboard.Copy(contentToCopy)
 			}
 		}

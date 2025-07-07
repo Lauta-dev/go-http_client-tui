@@ -4,44 +4,43 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 func Copy(content string) {
-	//xclip (X11), wl-clipboard (Wayland)
+	xdgSession := strings.ToLower(os.Getenv("XDG_SESSION_TYPE"))
+	var copyCmd *exec.Cmd
 
-	copy := ""
-	xdgSession := os.Getenv("XDG_SESSION_TYPE")
 	switch xdgSession {
 	case "wayland":
-		copy = "wl-copy"
-
+		copyCmd = exec.Command("wl-copy")
 	case "x11":
-		copy = "xclip"
+		copyCmd = exec.Command("xclip", "-selection", "clipboard")
+	default:
+		fmt.Println("Sesión desconocida o no soportada:", xdgSession)
+		return
 	}
 
-	cmd := exec.Command(copy)
-
-	if copy == "xclip" {
-		cmd = exec.Command(copy, "-selection", "clipboard")
-	}
-
-	in, err := cmd.StdinPipe()
-
+	stdin, err := copyCmd.StdinPipe()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error obteniendo stdin:", err)
+		return
 	}
 
-	if err := cmd.Start(); err != nil {
-		fmt.Println(err)
+	if err := copyCmd.Start(); err != nil {
+		fmt.Println("Error al iniciar comando:", err)
+		return
 	}
 
-	if _, err := in.Write([]byte(content)); err != nil {
-		fmt.Println(err)
+	if _, err := stdin.Write([]byte(content)); err != nil {
+		fmt.Println("Error al escribir al stdin:", err)
 	}
 
-	if err := in.Close(); err != nil {
-		fmt.Println(err)
+	if err := stdin.Close(); err != nil {
+		fmt.Println("Error al cerrar stdin:", err)
 	}
 
-	cmd.Wait()
+	if err := copyCmd.Wait(); err != nil {
+		fmt.Println("Error esperando al comando:", err)
+	}
 }
