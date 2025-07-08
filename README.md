@@ -5,6 +5,8 @@
 
 Un cliente HTTP moderno con **Interfaz de Usuario en Terminal (TUI)** construido con Go. Realiza peticiones HTTP de forma visual e intuitiva desde la terminal.
 
+> Nota importante: Este es un proyecto simple y básico que no incluye la capacidad de enviar archivos. Está diseñado para realizar peticiones HTTP estándar con texto plano, JSON y otros formatos de datos simples.
+
 ## ✨ Características
 
 - 🔧 **Métodos HTTP**: GET, POST, PUT, DELETE
