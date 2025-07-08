@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -85,21 +84,17 @@ x-api-key: abc123
 	`
 }
 
-func Help() *tview.Frame {
+func Help() *tview.TextView {
 	dialog := helpFile()
 
-	text := tview.NewTextView().SetDynamicColors(true)
-	text.SetBackgroundColor(tcell.ColorBlack.TrueColor())
-	text.SetTextColor(tcell.ColorWhite.TrueColor())
-	text.SetBorder(true).SetTitle(" > Help ").SetTitleAlign(tview.AlignLeft)
-	text.SetBorderPadding(1, 1, 1, 1)
+	text := tview.NewTextView()
+	text.SetBorder(true).
+		SetTitle(" > Help ('F1' para volver a la pantalla principal) ").
+		SetTitleAlign(tview.AlignLeft).
+		SetBorderPadding(1, 1, 1, 1)
+
+	text.SetDynamicColors(true)
 
 	fmt.Fprintln(text, dialog)
-
-	frame := tview.NewFrame(text).SetBorders(1, 1, 1, 1, 1, 1).AddText("> Para volver presione (F1)", false, tview.AlignLeft, tcell.ColorWhite.TrueColor())
-
-	frame.SetBackgroundColor(tcell.ColorBlack.TrueColor())
-
-	return frame
-
+	return text
 }
