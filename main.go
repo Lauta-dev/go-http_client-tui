@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	colors "http_client/const"
 	"http_client/internal/clipboard"
+	"http_client/logic"
 	"http_client/ui"
 	"http_client/utils"
 
@@ -15,6 +17,7 @@ import (
 var (
 	responseView  *tview.TextView
 	responseInfo  *tview.TextView
+	history       *tview.List
 	app           *tview.Application
 	contentToCopy string
 
@@ -42,16 +45,21 @@ func updateComponent(userUrl string, verb string, h map[string]string, qp map[st
 	data := Fetching(tmp, verb, h, qp, p, body)
 
 	app.QueueUpdateDraw(func() {
-		// Set footer info
 		responseInfo.Clear()
+		responseView.Clear()
 
 		format := fmt.Sprintf("%s, %s \nURL: %s", StatusCodesColors(status), contentType, completeUrl)
-
-		fmt.Fprintln(responseInfo, format)
-
-		// Set reponse info
-		responseView.Clear()
 		response := data
+		code := strings.Split(status, " ")[0]
+
+		err := logic.SaveItems(completeUrl, code, contentType, data, verb)
+
+		if err != nil {
+			fmt.Fprintf(responseInfo, "[red]%s", err.Error())
+		} else {
+			fmt.Fprintln(responseInfo, format)
+		}
+
 		fmt.Fprintln(responseView, response)
 	})
 
@@ -91,6 +99,7 @@ func main() {
 	responseView = ui.ResponseView()
 	responseInfo = ui.ResponseInfo()
 	variableEditor := ui.VariableEditor()
+	history := ui.History()
 
 	mainPage := tview.NewPages()
 	workspacePages := tview.NewPages()
@@ -145,6 +154,14 @@ func main() {
 				showHelpPage = true
 				mainPage.SwitchToPage("help")
 			}
+		case tcell.KeyF2:
+			if showHelpPage {
+				showHelpPage = false
+				mainPage.SwitchToPage("main")
+			} else {
+				showHelpPage = true
+				mainPage.SwitchToPage("history")
+			}
 		}
 
 		if event.Key() == tcell.KeyRune && event.Modifiers() == tcell.ModAlt {
@@ -162,6 +179,7 @@ func main() {
 
 	mainPage.AddPage("main", flex, true, true)
 	mainPage.AddPage("help", helpPage, true, false)
+	mainPage.AddPage("history", history, true, false)
 
 	if err := app.SetRoot(mainPage, true).EnableMouse(true).Run(); err != nil {
 		panic(err)

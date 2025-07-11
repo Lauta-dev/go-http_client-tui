@@ -26,6 +26,7 @@ func Form() (*tview.Form, *tview.DropDown, *tview.InputField) {
 	dropdown.SetFieldTextColor(constants.ColorTextSecondary)
 
 	dropdown.SetOptions(constants.MethodList(), nil)
+	dropdown.SetCurrentOption(0)
 	form.AddFormItem(dropdown)
 	form.AddFormItem(input)
 
