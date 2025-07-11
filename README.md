@@ -35,6 +35,7 @@ go build -o http-client .
 | Tecla | Acción |
 |-------|--------|
 | `F1` | Ayuda |
+| `F2` | Peticiones |
 | `Alt+F` | Pantalla completa |
 | `Alt+B` | Vista Body |
 | `Alt+Q` | Vista Query Params |

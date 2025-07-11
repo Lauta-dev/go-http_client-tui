@@ -14,6 +14,7 @@ func helpFile() string {
 > [yellow::b]CONTROLES PRINCIPALES[-::-]
 ================================================================================
 [green::b]F1[-::-]          - Mostrar/Ocultar ayuda
+[green::b]F2[-::-]          - Mostrar/Ocultar historial de peticiones
 [green::b]Alt+F[-::-]       - Pantalla completa para respuesta
 [green::b]Alt+B[-::-]       - Vista Body
 [green::b]Alt+Q[-::-]       - Vista Query Params
