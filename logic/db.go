@@ -27,14 +27,31 @@ type history struct {
 	CreatedAt    string
 }
 
-func Ggg() []history {
+func DelItems(id string) (string, error) {
+	db, err := sql.Open("sqlite", sqliteFile)
+
+	if err != nil {
+		return "", err
+	}
+
+	_, err = db.Exec("DELETE FROM request_history WHERE id = ?", id)
+
+	if err != nil {
+		return "", err
+	}
+
+	return "Eliminado", nil
+
+}
+
+func GetAllItems() []history {
 	db, err := sql.Open("sqlite", sqliteFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Leer y mostrar
-	rows, err := db.Query("SELECT id, url, method, status_code FROM request_history")
+	rows, err := db.Query("SELECT id, url, method, status_code FROM request_history ORDER BY created_at asc")
 	if err != nil {
 		log.Fatal(err)
 	}
