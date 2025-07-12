@@ -33,12 +33,19 @@ func addQueryParam(u *url.URL, qp map[string]string) *url.URL {
 	return u
 }
 
-func Fetching(userUrl string, verb string, h map[string]string, qp map[string]string, p []string, body string) string {
+func Fetching(
+	userUrl string,
+	verb string,
+	h map[string]string,
+	qp map[string]string,
+	p []string,
+	body string) (string, error) {
 	baseURL := AddPathParam(p, userUrl)
 	u, err := url.Parse(baseURL)
 
 	if err != nil {
-		return "Error al parsear la URL " + err.Error()
+
+		return "", err
 	}
 
 	finalURL := addQueryParam(u, qp)
@@ -47,7 +54,7 @@ func Fetching(userUrl string, verb string, h map[string]string, qp map[string]st
 
 	req, err := http.NewRequest(verb, userUrl, bytes.NewBuffer([]byte(body)))
 	if err != nil {
-		return "Error al crear peticion " + err.Error()
+		return "", err
 	}
 
 	for k, v := range h {
@@ -56,14 +63,14 @@ func Fetching(userUrl string, verb string, h map[string]string, qp map[string]st
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "Error al enviar peticion " + err.Error()
+		return "", err
 	}
 
 	defer res.Body.Close()
 	bytes, err := io.ReadAll(res.Body)
 
 	if err != nil {
-		return "Error al leer respuesta " + err.Error()
+		return "", err
 	}
 
 	json := utils.IndentJson(bytes)
@@ -71,5 +78,6 @@ func Fetching(userUrl string, verb string, h map[string]string, qp map[string]st
 	contentToCopy = json
 	contentType = res.Header.Get("Content-Type")
 	completeUrl = userUrl
-	return json
+
+	return json, nil
 }

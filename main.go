@@ -27,12 +27,18 @@ var (
 	completeUrl string // URL completa con la que se hace el fetching
 )
 
-func updateComponent(userUrl string, verb string, h map[string]string, qp map[string]string, p []string, body string, tmp string) {
+func updateComponent(
+	verb string,
+	h map[string]string,
+	qp map[string]string,
+	p []string,
+	body string,
+	userUrl string) {
 	app.QueueUpdateDraw(func() {
 		responseView.Clear()
 		responseInfo.Clear()
 
-		loadingFormat := fmt.Sprintf("[%s]%s[%s]",
+		loadingFormat := fmt.Sprintf("[%s::b]%s[%s::B]",
 			colors.ColorTextSecondary.String(),
 			"Cargando...",
 			colors.ColorPrimary.String(),
@@ -42,17 +48,27 @@ func updateComponent(userUrl string, verb string, h map[string]string, qp map[st
 		fmt.Fprintln(responseInfo, loadingFormat)
 	})
 
-	data := Fetching(tmp, verb, h, qp, p, body)
+	response, err := Fetching(userUrl, verb, h, qp, p, body)
+
+	if err != nil {
+		app.QueueUpdateDraw(func() {
+			responseInfo.Clear()
+			responseView.Clear()
+
+			fmt.Fprintln(responseView, err.Error())
+		})
+
+		return
+	}
 
 	app.QueueUpdateDraw(func() {
 		responseInfo.Clear()
 		responseView.Clear()
 
 		format := fmt.Sprintf("%s, %s \nURL: %s", StatusCodesColors(status), contentType, completeUrl)
-		response := data
 		code := strings.Split(status, " ")[0]
 
-		err := logic.SaveItems(completeUrl, code, contentType, data, verb)
+		err := logic.SaveItems(completeUrl, code, contentType, response, verb)
 
 		if err != nil {
 			fmt.Fprintf(responseInfo, "[red]%s", err.Error())
@@ -74,16 +90,15 @@ func SendInfo(
 	pathParamPage *tview.TextArea,
 	varr *tview.TextArea,
 ) {
-	url := formInput.GetText()
 	_, selected := dropdown.GetCurrentOption()
 	body := bodyContent.GetText()
 	header := utils.ParseHeader(headerPage.GetText())
 	queryParams := utils.ParseHeader(queryParamPage.GetText())
 	params := utils.ParsePathParams(pathParamPage.GetText())
 
-	tmp := utils.ParseInput(url, utils.ParseHeader(varr.GetText()))
+	url := utils.ParseInput(formInput.GetText(), utils.ParseHeader(varr.GetText()))
 
-	go updateComponent(url, selected, header, queryParams, params, body, tmp)
+	go updateComponent(selected, header, queryParams, params, body, url)
 }
 
 func main() {
