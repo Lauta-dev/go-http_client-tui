@@ -119,13 +119,25 @@ func main() {
 	mainPage := tview.NewPages()
 	workspacePages := tview.NewPages()
 
-	showHelpPage := false
+	flexx := tview.NewFlex()
+	flexx.SetDirection(tview.FlexRow)
 
-	windows := tview.NewFlex().SetDirection(tview.FlexRow).AddItem(workspacePages, 0, 2, false)
+	flexx.AddItem(form, 0, 1, true)
+	flexx.AddItem(
+		workspacePages.
+			AddPage("body", bodyEditor, true, true).
+			AddPage("header", headerEditor, true, false).
+			AddPage("qp", queryParamEditor, true, false).
+			AddPage("pp", pathParamEditor, true, false).
+			AddPage("var", variableEditor, true, false),
+		0, 1, false)
+
+	showHelpPage := false
 
 	responseWindow := tview.NewFlex().SetDirection(tview.FlexRow)
 	responseWindow.AddItem(responseView, 0, 8, false)
 	responseWindow.AddItem(responseInfo, 0, 1, false)
+	windows := tview.NewFlex().SetDirection(tview.FlexRow).AddItem(responseWindow, 0, 2, false)
 
 	Keys(app, workspacePages, windows)
 
@@ -134,15 +146,7 @@ func main() {
 	tview.Styles.MoreContrastBackgroundColor = tcell.ColorBlack.TrueColor()
 	tview.Styles.PrimaryTextColor = tcell.ColorDarkSlateGray.TrueColor()
 
-	workspacePages.
-		AddPage("body", bodyEditor, true, false).
-		AddPage("response", responseWindow, true, true).
-		AddPage("header", headerEditor, true, false).
-		AddPage("qp", queryParamEditor, true, false).
-		AddPage("pp", pathParamEditor, true, false).
-		AddPage("var", variableEditor, true, false)
-
-	flex.AddItem(form, 0, 1, false)
+	flex.AddItem(flexx, 0, 1, false)
 	flex.AddItem(windows, 0, 1, false)
 
 	fullScreen := false
@@ -182,7 +186,7 @@ func main() {
 		if event.Key() == tcell.KeyRune && event.Modifiers() == tcell.ModAlt {
 			switch event.Rune() {
 			case 'd':
-				workspacePages.SwitchToPage("response")
+				app.SetFocus(responseWindow)
 				SendInfo(input, dropdown, bodyEditor, headerEditor, queryParamEditor, pathParamEditor, variableEditor)
 
 			case 'n':

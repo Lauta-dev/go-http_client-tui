@@ -27,6 +27,7 @@ func History() *tview.Flex {
 	list := tview.NewList()
 	list.SetSecondaryTextColor(constants.ColorBackground.TrueColor())
 	list.SetBorder(true)
+	list.SetTitle(" > Historial de Request ('F2' para volver, 'F3' para actualizar lista)")
 
 	flex := tview.NewFlex()
 	responseView := ResponseView()
