@@ -46,6 +46,12 @@ go build -o http-client .
 | `Alt+N` | Copiar respuesta al portapapeles (X11 y Wayland) |
 | `Ctrl+C` | Salir |
 
+### Controles para la pestaña de peticiones
+| Tecla | Acción |
+|-------|--------|
+| `u` | Actualizar lista |
+| `d` | Eliminar elemento |
+
 ## 📋 Uso Rápido
 
 ### Petición GET
