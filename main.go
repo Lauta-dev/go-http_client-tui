@@ -114,7 +114,7 @@ func main() {
 	responseView = ui.ResponseView()
 	responseInfo = ui.ResponseInfo()
 	variableEditor := ui.VariableEditor()
-	history := ui.History()
+	history := ui.History(app)
 
 	mainPage := tview.NewPages()
 	workspacePages := tview.NewPages()
@@ -191,6 +191,9 @@ func main() {
 
 			case 'n':
 				clipboard.Copy(contentToCopy)
+
+			case 'i':
+				app.SetFocus(form)
 			}
 		}
 		return event
