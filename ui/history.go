@@ -15,7 +15,6 @@ DROP TABLE IF EXISTS request_history;
 
 import (
 	"fmt"
-	constants "http_client/const"
 	"http_client/logic"
 	"strconv"
 
@@ -23,11 +22,12 @@ import (
 	"github.com/rivo/tview"
 )
 
-func History() *tview.Flex {
+func History(app *tview.Application) *tview.Flex {
 	list := tview.NewList()
-	list.SetSecondaryTextColor(constants.ColorBackground.TrueColor())
+
 	list.SetBorder(true)
 	list.SetTitle(" > Historial de Request ('F2' para volver, 'F3' para actualizar lista)")
+	list.ShowSecondaryText(false)
 
 	flex := tview.NewFlex()
 	responseView := ResponseView()
@@ -57,7 +57,6 @@ func History() *tview.Flex {
 	flex.AddItem(responseView, 0, 1, false)
 
 	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-
 		switch event.Key() {
 		case tcell.KeyF3:
 			list.Clear()
@@ -67,10 +66,29 @@ func History() *tview.Flex {
 				mainText := fmt.Sprintf("(%s, %s) - %s", v.Method, code, v.URL)
 				list.AddItem(mainText, v.ID, 'a', nil)
 			}
+
 		}
 
 		return event
 	})
 
+	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+
+		switch event.Rune() {
+		case 'k':
+			app.SetFocus(responseView)
+		}
+
+		return event
+	})
+
+	responseView.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Rune() {
+		case 'j':
+			app.SetFocus(list)
+		}
+
+		return event
+	})
 	return flex
 }
