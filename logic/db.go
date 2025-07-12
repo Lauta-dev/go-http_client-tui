@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 )
 
 var (
-	sqliteFile string = "back.db"
+	sqliteFile string = os.Getenv("HOME") + "/back.db"
 )
 
 // [GET, 200] URL
