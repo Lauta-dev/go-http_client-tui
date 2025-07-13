@@ -78,7 +78,15 @@ func updateComponent(
 
 		fmt.Fprintln(responseView, response)
 	})
+}
 
+func TriggerErrorAfterRequest(err error) {
+	app.QueueUpdateDraw(func() {
+		responseInfo.Clear()
+		responseView.Clear()
+
+		fmt.Fprintln(responseView, err.Error())
+	})
 }
 
 func SendInfo(
@@ -96,7 +104,12 @@ func SendInfo(
 	queryParams := utils.ParseHeader(queryParamPage.GetText())
 	params := utils.ParsePathParams(pathParamPage.GetText())
 
-	url := utils.ParseInput(formInput.GetText(), utils.ParseHeader(varr.GetText()))
+	url, err := utils.ParseInput(formInput.GetText(), utils.ParseHeader(varr.GetText()))
+
+	if err != nil {
+		go TriggerErrorAfterRequest(err)
+		return
+	}
 
 	go updateComponent(selected, header, queryParams, params, body, url)
 }
