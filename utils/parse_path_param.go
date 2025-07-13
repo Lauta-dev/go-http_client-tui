@@ -9,7 +9,7 @@ func ParsePathParams(param string) []string {
 	headers := strings.Split(param, ",")
 
 	for _, v := range headers {
-		if strings.Contains(v, ignoreChar) {
+		if v == "" || strings.Contains(v, ignoreChar) {
 			continue
 		}
 
