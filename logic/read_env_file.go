@@ -11,49 +11,50 @@ type Env struct {
 	value string
 }
 
+// Si hay algún error la función retorna una variable vacía
 func ReadEnvFile(path string) string {
 	if path == "" {
 		return ""
 	}
 
-	ignoreChar := "#"
-	mapp := []Env{}
-	final_string := ""
+	ignorePrefix := "#"
+	envVars := []Env{}
 
-	fi, err := os.ReadFile(path)
+	content, err := os.ReadFile(path)
 
 	if err != nil {
 		return ""
 	}
 
-	// string
-	arch := string(fi)
+	lines := strings.Split(string(content), "\n")
 
-	s := strings.Split(arch, "\n")
-
-	for _, v := range s {
-		if strings.HasPrefix(v, ignoreChar) {
+	for _, line := range lines {
+		if strings.HasPrefix(line, ignorePrefix) || line == "" {
 			continue
 		}
 
-		if v != "" {
-			d := strings.Split(v, "=")
-			key := strings.TrimSpace(d[0])
-			value := strings.TrimSpace(d[1])
-
-			mapp = append(mapp, Env{
-				key, value,
-			})
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
 		}
+
+		key := strings.TrimSpace(parts[0])
+		value := strings.TrimSpace(parts[1])
+
+		if key == "" {
+			continue
+		}
+
+		envVars = append(envVars, Env{
+			key, value,
+		})
 	}
 
-	for _, v := range mapp {
-		l := fmt.Sprintf("%s: %s,\n", v.key, v.value)
-
-		final_string += l
+	// Crear un string secuecial
+	var builder strings.Builder
+	for _, v := range envVars {
+		builder.WriteString(fmt.Sprintf("%s: %s,\n", v.key, v.value))
 	}
 
-	fmt.Println(final_string)
-
-	return final_string
+	return builder.String()
 }
