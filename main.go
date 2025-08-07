@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"strings"
 
@@ -115,6 +116,10 @@ func SendInfo(
 }
 
 func main() {
+
+	envFilePath := flag.String("env-file", "", "")
+	flag.Parse()
+
 	app = tview.NewApplication()
 	flex := tview.NewFlex()
 
@@ -215,6 +220,8 @@ func main() {
 	mainPage.AddPage("main", flex, true, true)
 	mainPage.AddPage("help", helpPage, true, false)
 	mainPage.AddPage("history", history, true, false)
+
+	variableEditor.SetText(logic.ReadEnvFile(*envFilePath), false)
 
 	if err := app.SetRoot(mainPage, true).EnableMouse(true).Run(); err != nil {
 		panic(err)
