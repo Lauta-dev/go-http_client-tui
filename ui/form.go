@@ -1,7 +1,8 @@
 package ui
 
 import (
-	constants "http_client/const"
+	color "http_client/const/color_wrapper"
+	http "http_client/const/http_verbs"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -14,18 +15,18 @@ func Form() (*tview.Form, *tview.DropDown, *tview.InputField) {
 	input.SetPlaceholder("http://example.com")
 	input.SetPlaceholderTextColor(tcell.ColorGray.TrueColor())
 
-	form.SetFieldBackgroundColor(constants.ColorBackground)
-	form.SetFieldTextColor(constants.ColorTextPrimary)
+	form.SetFieldBackgroundColor(color.ColorBackground)
+	form.SetFieldTextColor(color.ColorTextPrimary)
 	form.SetBorder(true)
 	form.SetTitle(" > Request ('F1' para ayuda) ")
 	form.SetTitleAlign(tview.AlignLeft)
 
-	dropdown.SetBackgroundColor(constants.ColorBackground)
-	dropdown.SetFieldBackgroundColor(constants.ColorBackground)
-	dropdown.SetTitleColor(constants.ColorTextPrimary)
-	dropdown.SetFieldTextColor(constants.ColorTextSecondary)
+	dropdown.SetBackgroundColor(color.ColorBackground)
+	dropdown.SetFieldBackgroundColor(color.ColorBackground)
+	dropdown.SetTitleColor(color.ColorTextPrimary)
+	dropdown.SetFieldTextColor(color.ColorTextSecondary)
 
-	dropdown.SetOptions(constants.MethodList(), nil)
+	dropdown.SetOptions(http.MethodList(), nil)
 	dropdown.SetCurrentOption(0)
 	form.AddFormItem(dropdown)
 	form.AddFormItem(input)

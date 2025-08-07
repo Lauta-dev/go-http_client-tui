@@ -15,7 +15,7 @@ DROP TABLE IF EXISTS request_history;
 
 import (
 	"fmt"
-	colors "http_client/const"
+	colors "http_client/const/color_wrapper"
 	"http_client/logic"
 	"strconv"
 
