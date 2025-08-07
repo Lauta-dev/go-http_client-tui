@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"http_client/utils"
 	"io"
 	"net/http"
 	"net/url"
@@ -73,11 +72,9 @@ func Fetching(
 		return "", err
 	}
 
-	json := utils.IndentJson(bytes)
 	status = res.Status
-	contentToCopy = json
 	contentType = res.Header.Get("Content-Type")
 	completeUrl = userUrl
 
-	return json, nil
+	return string(bytes), nil
 }
