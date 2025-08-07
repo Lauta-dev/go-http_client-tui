@@ -7,17 +7,22 @@ Un cliente HTTP moderno con **Interfaz de Usuario en Terminal (TUI)** construido
 
 > Nota importante: Este es un proyecto simple y básico que no incluye la capacidad de enviar archivos. Está diseñado para realizar peticiones HTTP estándar con texto plano, JSON y otros formatos de datos simples.
 
-## ✨ Características
+## Características
 
-- 🔧 **Métodos HTTP**: GET, POST, PUT, DELETE
-- 🎨 **Interfaz Visual**: Navegación intuitiva con colores
-- 📝 **Gestión Completa**: Body, Headers, Query Params, Path Params
-- 🌈 **Códigos de Estado Coloreados**: Verde (2xx), Amarillo (3xx), Rojo (4xx/5xx)
-- 📄 **Resaltado JSON**: Respuestas formateadas automáticamente
-- ⌨️ **Atajos de Teclado**: Control completo sin mouse
-- 🖥️ **Modo Pantalla Completa**: Maximizar vista de respuesta
+- **Métodos HTTP**: GET, POST, PUT, DELETE
+- **Interfaz Visual**: Navegación intuitiva con colores
+- **Gestión Completa**: Body, Headers, Query Params, Path Params
+- **Códigos de Estado Coloreados**: Verde (2xx), Amarillo (3xx), Rojo (4xx/5xx)
+- **Resaltado JSON**: Respuestas formateadas automáticamente
+- **Atajos de Teclado**: Control completo sin mouse
+- **Modo Pantalla Completa**: Maximizar vista de respuesta
+- **Soporte para variables**: Se puede cargar usando --env-file o -env-file
 
-## 🚀 Instalación
+## Comandos CLI
+- **--env-file** | **-env-file**: Importa un archivo `.env`
+- **--help** | **-help**: Muestra la ayuda
+
+## Instalación
 
 ```bash
 # Clonar y ejecutar
@@ -30,7 +35,7 @@ go build -o http-client .
 ./http-client
 ```
 
-## 🎮 Controles
+## Controles
 
 | Tecla | Acción |
 |-------|--------|
@@ -55,7 +60,7 @@ go build -o http-client .
 | `j` | Cambiar a la vista de lista |
 | `k` | Cambiar a la vista de response |
 
-## 📋 Uso Rápido
+## Uso Rápido
 
 ### Petición GET
 1. Seleccionar `GET`
@@ -87,13 +92,13 @@ x-api-key: your-key
 # Esta línea será ignorada
 ```
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 - **[tview](https://github.com/rivo/tview)** - Framework TUI
 - **[tcell](https://github.com/gdamore/tcell)** - Terminal handling
 - **net/http** - Cliente HTTP nativo
 
-## 🤝 Contribución
+## Contribución
 
 1. Fork el repositorio
 2. Crea tu rama (`git checkout -b feature/nueva-caracteristica`)
