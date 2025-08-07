@@ -14,7 +14,9 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/tview v0.0.0-20250501113434-0c592cd31026 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
+	golang.org/x/net v0.6.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/term v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
