@@ -96,6 +96,8 @@ x-api-key: your-key
 
 - **[tview](https://github.com/rivo/tview)** - Framework TUI
 - **[tcell](https://github.com/gdamore/tcell)** - Terminal handling
+- **[chroma](https://github.com/alecthomas/chroma)** - Colores en las respuestas
+- **[gohtml](https://github.com/yosssi/gohtml)** - Dar formato al HTML
 - **net/http** - Cliente HTTP nativo
 
 ## Contribución
