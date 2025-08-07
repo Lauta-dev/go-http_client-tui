@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	colors "http_client/const"
+	colors "http_client/const/color_wrapper"
 	"strconv"
 	"strings"
 )
