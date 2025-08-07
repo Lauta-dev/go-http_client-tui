@@ -117,8 +117,14 @@ func SendInfo(
 
 func main() {
 
-	envFilePath := flag.String("env-file", "", "")
+	envFilePath := flag.String("env-file", "", "Cargar archivo .env")
+	helpTrigger := flag.Bool("help", false, "Muestra ayuda")
 	flag.Parse()
+
+	if *helpTrigger {
+		HelpTrigger()
+		return
+	}
 
 	app = tview.NewApplication()
 	flex := tview.NewFlex()
