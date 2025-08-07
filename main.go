@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	colors "http_client/const"
+	colors "http_client/const/color_wrapper"
 	"http_client/internal/clipboard"
 	"http_client/logic"
 	"http_client/ui"
@@ -77,7 +77,14 @@ func updateComponent(
 			fmt.Fprintln(responseInfo, format)
 		}
 
-		fmt.Fprintln(responseView, response)
+		display, err := PrettyStyle(contentType, []byte(response), responseView)
+		contentToCopy = display
+
+		if err != nil {
+			responseView.Clear()
+			fmt.Fprintf(responseView, "Error al colorar la salída\n%s\n\n%s", err.Error(), display)
+		}
+
 	})
 }
 
