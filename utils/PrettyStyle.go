@@ -1,9 +1,8 @@
-package main
+package utils
 
 import (
 	chromacolor "http_client/const/chroma_color"
 	mime "http_client/const/mime"
-	"http_client/utils"
 
 	"github.com/alecthomas/chroma/quick"
 	"github.com/rivo/tview"
@@ -11,7 +10,7 @@ import (
 )
 
 func PrettyStyle(contentType string, response []byte, responseView *tview.TextView) (string, error) {
-	lexer := utils.MimeToLexer(contentType)
+	lexer := MimeToLexer(contentType)
 
 	// Preparar para escribir el output
 	writer := tview.ANSIWriter(responseView)
@@ -24,7 +23,7 @@ func PrettyStyle(contentType string, response []byte, responseView *tview.TextVi
 		toDisplay = string(gohtml.FormatBytes(response))
 
 	case mime.Json:
-		toDisplay = string(utils.IndentJson(response))
+		toDisplay = string(IndentJson(response))
 
 	default:
 		toDisplay = string(response)

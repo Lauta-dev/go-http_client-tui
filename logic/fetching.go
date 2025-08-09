@@ -1,4 +1,4 @@
-package main
+package logic
 
 import (
 	"bytes"
@@ -6,6 +6,13 @@ import (
 	"net/http"
 	"net/url"
 )
+
+type Fetch struct {
+	Status      string
+	ContentType string
+	Body        string
+	UserUrl     string
+}
 
 func AddPathParam(params []string, baseURL string) string {
 	pathParam := ""
@@ -38,13 +45,13 @@ func Fetching(
 	h map[string]string,
 	qp map[string]string,
 	p []string,
-	body string) (string, error) {
+	body string) (Fetch, error) {
 	baseURL := AddPathParam(p, userUrl)
 	u, err := url.Parse(baseURL)
 
 	if err != nil {
 
-		return "", err
+		return Fetch{}, err
 	}
 
 	finalURL := addQueryParam(u, qp)
@@ -53,7 +60,7 @@ func Fetching(
 
 	req, err := http.NewRequest(verb, userUrl, bytes.NewBuffer([]byte(body)))
 	if err != nil {
-		return "", err
+		return Fetch{}, err
 	}
 
 	for k, v := range h {
@@ -62,19 +69,24 @@ func Fetching(
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		return Fetch{}, err
 	}
 
 	defer res.Body.Close()
-	bytes, err := io.ReadAll(res.Body)
+	bodyByte, err := io.ReadAll(res.Body)
 
 	if err != nil {
-		return "", err
+		return Fetch{}, err
 	}
 
-	status = res.Status
-	contentType = res.Header.Get("Content-Type")
-	completeUrl = userUrl
+	bodyToString := string(bodyByte)
+	status := res.Status
+	contentType := res.Header.Get("Content-Type")
 
-	return string(bytes), nil
+	return Fetch{
+		Status:      status,
+		Body:        bodyToString,
+		ContentType: contentType,
+		UserUrl:     userUrl,
+	}, nil
 }

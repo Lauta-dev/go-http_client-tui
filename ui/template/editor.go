@@ -1,4 +1,4 @@
-package ui
+package template
 
 import "github.com/rivo/tview"
 

@@ -8,6 +8,7 @@ import (
 	"github.com/rivo/tview"
 )
 
+// Crea y devuelve: Form, DropDowny Input
 func Form() (*tview.Form, *tview.DropDown, *tview.InputField) {
 	form := tview.NewForm()
 	dropdown := tview.NewDropDown().SetLabel("Método")

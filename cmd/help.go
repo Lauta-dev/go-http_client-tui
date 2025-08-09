@@ -1,8 +1,9 @@
-package main
+package cmd
 
 import "fmt"
 
-func HelpTrigger() {
+// Mostrar ayuda por terminal
+func Help() {
 
 	dialog := `
 
