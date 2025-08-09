@@ -4,7 +4,7 @@ import (
 	"http_client/cmd"
 	"http_client/internal/clipboard"
 	"http_client/logic"
-	ui "http_client/ui/components"
+	component "http_client/ui/components"
 	"http_client/ui/events"
 	"http_client/ui/layout"
 	"http_client/ui/shotcust"
@@ -36,8 +36,8 @@ func StartApp() {
 
 	mainLayout := main.Main
 	mainPage.AddPage("main", mainLayout, true, true)
-	mainPage.AddPage("help", ui.Help(), true, false)
-	mainPage.AddPage("history", ui.History(app), true, false)
+	mainPage.AddPage("help", component.Help(), true, false)
+	mainPage.AddPage("history", component.History(app), true, false)
 
 	requestSender := &events.RequestSender{
 		App:           app,
