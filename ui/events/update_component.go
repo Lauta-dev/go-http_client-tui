@@ -64,7 +64,7 @@ func (ui *UIController) UpdateComponent(
 		format := fmt.Sprintf("%s, %s \nURL: %s", utils.StatusCodesColors(res.Status), res.ContentType, res.UserUrl)
 		code := strings.Split(res.Status, " ")[0]
 
-		err := logic.SaveItems(res.ContentType, code, res.ContentType, res.Body, httpMethod)
+		err := logic.SaveItems(res.UserUrl, code, res.ContentType, res.Body, httpMethod)
 
 		if err != nil {
 			fmt.Fprintf(responseInfo, "[red]%s", err.Error())

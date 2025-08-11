@@ -112,7 +112,7 @@ func GetItemById(iid string) (history, error) {
 		return f, fmt.Errorf("error al abrir base de datos: %w", err)
 	}
 
-	row := db.QueryRow("SELECT * FROM request_history WHERE id = ?", iid)
+	row := db.QueryRow("SELECT id, url, method, status_code, content_type, response_body, created_at FROM request_history WHERE id = ?", iid)
 
 	err = row.Scan(&id, &url, &method, &statusCode, &contentType, &body, &createAt)
 
