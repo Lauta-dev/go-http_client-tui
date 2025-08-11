@@ -24,7 +24,7 @@ func (ui *UIController) UpdateComponent(
 	queryParams map[string]string,
 	params []string,
 	body string,
-	userUrl string) {
+	userUrl string, saveRequest bool) {
 
 	app := ui.App
 	responseView := ui.ResponseView
@@ -61,15 +61,17 @@ func (ui *UIController) UpdateComponent(
 		responseInfo.Clear()
 		responseView.Clear()
 
-		format := fmt.Sprintf("%s, %s \nURL: %s", utils.StatusCodesColors(res.Status), res.ContentType, res.UserUrl)
-		code := strings.Split(res.Status, " ")[0]
+		if saveRequest {
+			format := fmt.Sprintf("%s, %s \nURL: %s", utils.StatusCodesColors(res.Status), res.ContentType, res.UserUrl)
+			code := strings.Split(res.Status, " ")[0]
 
-		err := logic.SaveItems(res.UserUrl, code, res.ContentType, res.Body, httpMethod)
+			err := logic.SaveItems(res.UserUrl, code, res.ContentType, res.Body, httpMethod)
 
-		if err != nil {
-			fmt.Fprintf(responseInfo, "[red]%s", err.Error())
-		} else {
-			fmt.Fprintln(responseInfo, format)
+			if err != nil {
+				fmt.Fprintf(responseInfo, "[red]%s", err.Error())
+			} else {
+				fmt.Fprintln(responseInfo, format)
+			}
 		}
 
 		display, err := utils.PrettyStyle(res.ContentType, []byte(res.Body), responseView)

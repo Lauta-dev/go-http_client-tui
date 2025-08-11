@@ -37,7 +37,10 @@ func StartApp() {
 	mainLayout := main.Main
 	mainPage.AddPage("main", mainLayout, true, true)
 	mainPage.AddPage("help", component.Help(), true, false)
-	mainPage.AddPage("history", component.History(app), true, false)
+	if cli.ActHistory {
+		mainPage.AddPage("history", component.History(app), true, false)
+
+	}
 
 	requestSender := &events.RequestSender{
 		App:           app,
@@ -65,7 +68,7 @@ func StartApp() {
 				main.EditorPanel.Header,
 				main.EditorPanel.QueryParam,
 				main.EditorPanel.PathParam,
-				main.EditorPanel.Variable)
+				main.EditorPanel.Variable, cli.ActHistory)
 		},
 		FocusForm: func() { app.SetFocus(main.Form.Container) },
 	}

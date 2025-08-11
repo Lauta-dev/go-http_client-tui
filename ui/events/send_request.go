@@ -20,6 +20,7 @@ func (rs *RequestSender) SendRequest(
 	queryParamPage *tview.TextArea,
 	pathParamPage *tview.TextArea,
 	varr *tview.TextArea,
+	saveRequest bool,
 ) {
 	_, selected := dropdown.GetCurrentOption()
 	body := bodyContent.GetText()
@@ -46,5 +47,5 @@ func (rs *RequestSender) SendRequest(
 		ContentToCopy: &body,
 	}
 
-	go uiController.UpdateComponent(selected, header, queryParams, params, body, url)
+	go uiController.UpdateComponent(selected, header, queryParams, params, body, url, saveRequest)
 }

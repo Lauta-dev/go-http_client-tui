@@ -5,14 +5,14 @@ import "flag"
 type CliOptions struct {
 	EnvFilePath string // Ruta del archivo `.env`
 	Help        bool   // Bool para mostrar la ayuda
+	ActHistory  bool
 }
 
 func Launch() CliOptions {
 	envFilePath := flag.String("env-file", "", ".env")
-	envFilePathShort := flag.String("ef", "", ".env")
+	activateHistory := flag.Bool("activate-history", false, "history .db")
 	help := flag.Bool("help", false, "Ayuda")
 	helpShort := flag.Bool("h", false, "Ayuda")
-
 	flag.Parse()
 
 	if *help || *helpShort {
@@ -20,13 +20,9 @@ func Launch() CliOptions {
 		return CliOptions{Help: true}
 	}
 
-	if *envFilePath != "" {
-		return CliOptions{EnvFilePath: *envFilePath}
+	return CliOptions{
+		EnvFilePath: *envFilePath,
+		Help:        *help,
+		ActHistory:  *activateHistory,
 	}
-
-	if *envFilePathShort != "" {
-		return CliOptions{EnvFilePath: *envFilePathShort}
-	}
-
-	return CliOptions{}
 }
