@@ -3,6 +3,7 @@ package logic
 import (
 	"database/sql"
 	"fmt"
+	"http_client/utils"
 	"log"
 	"os"
 	"strconv"
@@ -79,6 +80,7 @@ func GetAllItems() []history {
 func SaveItems(url string, code string, contentType string, responseBody string, method string) error {
 	createAt := time.Now().Format(time.RFC3339)
 	id := createAt
+	body := utils.IdentText([]byte(responseBody), contentType)
 
 	insert := `
 	INSERT INTO request_history (
@@ -93,7 +95,7 @@ func SaveItems(url string, code string, contentType string, responseBody string,
 
 	defer db.Close()
 
-	_, err = db.Exec(insert, id, url, method, code, contentType, responseBody, createAt)
+	_, err = db.Exec(insert, id, url, method, code, contentType, body.ToDisplay, createAt)
 
 	if err != nil {
 		return err
