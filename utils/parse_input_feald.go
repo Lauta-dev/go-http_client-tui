@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -19,7 +20,14 @@ func ParseInput(input string, variables map[string]string) (string, error) {
 			if ok {
 				s[i] = val
 			} else {
-				noMatch += v + "\n" // Solo agrega el no encontrado
+
+				env := os.Getenv(key)
+				if env != "" {
+					s[i] = env
+				} else {
+					noMatch += v + "\n" // Solo agrega el no encontrado
+				}
+
 			}
 		}
 	}

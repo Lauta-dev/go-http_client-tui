@@ -29,5 +29,4 @@ func StatusCodesColors(statusCode string) string {
 	}
 
 	return fmt.Sprintf("%s%s", color, statusCode)
-
 }

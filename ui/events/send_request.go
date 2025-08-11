@@ -24,7 +24,7 @@ func (rs *RequestSender) SendRequest(
 ) {
 	_, selected := dropdown.GetCurrentOption()
 	body := bodyContent.GetText()
-	header := utils.ParseHeader(headerPage.GetText())
+	header := utils.ParseHeadera(headerPage.GetText(), utils.ParseHeader(varr.GetText()))
 	queryParams := utils.ParseHeader(queryParamPage.GetText())
 	params := utils.ParsePathParams(pathParamPage.GetText())
 
