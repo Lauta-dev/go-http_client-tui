@@ -61,7 +61,7 @@ func (ui *UIController) UpdateComponent(
 		responseInfo.Clear()
 		responseView.Clear()
 
-		format := fmt.Sprintf("%s, %s \nURL: %s", utils.StatusCodesColors(res.Status), res.ContentType, res.UserUrl)
+		format := utils.ResponseInfoFormat(res.ContentType, res.UserUrl, res.Status)
 		code := strings.Split(res.Status, " ")[0]
 		if saveRequest {
 			err := logic.SaveItems(res.UserUrl, code, res.ContentType, res.Body, httpMethod)
