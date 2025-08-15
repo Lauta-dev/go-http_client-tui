@@ -13,6 +13,9 @@ func MimeToLexer(contentType string) string {
 	if strings.Contains(contentType, mime.HtmlLong) {
 		return mime.Html
 	}
+	if strings.Contains(contentType, mime.CsvLong) {
+		return mime.Csv
+	}
 	// Podés agregar más tipos
 	return mime.PlainText
 }
