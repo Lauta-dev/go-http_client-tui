@@ -9,6 +9,7 @@ import (
 	"http_client/ui/events"
 	"http_client/ui/layout"
 	"http_client/ui/shotcust"
+	"http_client/utils"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -18,7 +19,7 @@ import (
 
 type Tabs struct {
 	ID             string
-	Input          string
+	Url            string
 	DropDownOption string
 	Headers        string
 	QueryParam     string
@@ -118,7 +119,7 @@ func StartApp() {
 
 			tabsMap[currentId] = Tabs{
 				ID:             currentId,
-				Input:          inputText,
+				Url:            inputText,
 				DropDownOption: dropDown,
 				Headers:        headers,
 				QueryParam:     queryParams,
@@ -130,7 +131,7 @@ func StartApp() {
 			}
 
 			statusCode := strings.SplitN(responseInfo, ",", 2)
-			mainText := fmt.Sprintf("[#ffffff] (%s) - %s ", statusCode[0], inputText)
+			mainText := fmt.Sprintf("[#ffffff] [%s] - %s ", statusCode[0], inputText)
 
 			tabList.SetItemText(currentListId, mainText, currentId)
 		},
@@ -154,13 +155,35 @@ func StartApp() {
 		// Cada que se selecciona un elemento de la lista con "enter", cambia a la pestaña principal y actualiza los valores
 		go func() {
 			app.QueueUpdateDraw(func() {
-				main.LeftPanel.Input.SetText(tab.Input)
+
+				// Limpio para añadir los estilos
+				responseView.Clear()
+				responseInfo.Clear()
+
+				main.LeftPanel.Input.SetText(tab.Url)
 				main.LeftPanel.DropDown.SetTitle(tab.DropDownOption)
 				main.EditorPanel.Header.SetText(tab.Headers, false)
 				main.EditorPanel.QueryParam.SetText(tab.QueryParam, false)
 				main.EditorPanel.PathParam.SetText(tab.PathParam, false)
 				main.EditorPanel.Variable.SetText(tab.Variables, false)
 				main.EditorPanel.Body.SetText(tab.Body, false)
+
+				if tab.ResponseInfo != "" {
+					statusAndContentType := strings.SplitN(tab.ResponseInfo, ",", 2)
+					f := utils.ResponseInfoFormat(
+						strings.TrimSpace(strings.Split(statusAndContentType[1], "\n")[0]),
+						tab.Url,
+						strings.TrimSpace(statusAndContentType[0]),
+					)
+					main.RightPanel.ResponseInfo.SetText(f)
+
+				}
+
+				if tab.ResponseBody != "" {
+					ct := strings.SplitN(tab.ResponseInfo, ",", 2)
+					utils.PrettyStyle(strings.TrimSpace(ct[1]), []byte(tab.ResponseBody), responseView)
+					return
+				}
 
 				main.RightPanel.ResponseView.SetText(tab.ResponseBody)
 				main.RightPanel.ResponseInfo.SetText(tab.ResponseInfo)
@@ -180,7 +203,7 @@ func StartApp() {
 
 			tabsMap[id] = Tabs{
 				ID:             id,
-				Input:          "",
+				Url:            "",
 				DropDownOption: "",
 				Headers:        "",
 				QueryParam:     "",
