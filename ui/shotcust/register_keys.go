@@ -19,7 +19,7 @@ type Shortcuts struct {
 	ShowHelpPage           bool
 	ShowRequestHistoryPage bool
 	ChangeToFullScreen     bool
-	ShowTabPage            bool
+	ShowTabPage            *bool
 }
 
 func (s *Shortcuts) RegisterKeys() {
@@ -75,11 +75,11 @@ func (s *Shortcuts) RegisterKeys() {
 			}
 
 		case tcell.KeyF3:
-			if s.ShowTabPage {
-				s.ShowTabPage = false
+			if *s.ShowTabPage {
+				*s.ShowTabPage = false
 				s.MainPage.SwitchToPage("main")
 			} else {
-				s.ShowTabPage = true
+				*s.ShowTabPage = true
 				s.MainPage.SwitchToPage("tab")
 				s.SaveStateFn()
 			}

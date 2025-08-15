@@ -17,81 +17,188 @@ import (
 	"github.com/rivo/tview"
 )
 
-type Tabs struct {
-	ID             string
-	Url            string
-	DropDownOption string
-	Headers        string
-	QueryParam     string
-	PathParam      string
-	Variables      string
-	Body           string
-	ResponseBody   string
-	ResponseInfo   string
+// Tab representa una pestaña con toda la información de una petición HTTP
+type Tab struct {
+	ID           string
+	URL          string
+	Method       string
+	Headers      string
+	QueryParams  string
+	PathParams   string
+	Variables    string
+	Body         string
+	ResponseBody string
+	ResponseInfo string
 }
 
-var (
+// AppState mantiene el estado global de la aplicación
+type AppState struct {
+	app           *tview.Application
+	mainPage      *tview.Pages
 	responseView  *tview.TextView
 	responseInfo  *tview.TextView
-	app           *tview.Application
 	contentToCopy string
-)
 
-func StartApp() {
+	// Estado de pestañas
+	currentTab    string
+	currentListID int
+	tabs          map[string]*Tab
+	tabList       *tview.List
 
-	cli := cmd.Launch()
+	// Estado de páginas
+	showHelpPage bool
+	showTabPage  bool // true -> mostrar layout, false -> mostrar lista de pestañas
+	fullScreen   bool
+}
 
-	firstId := uuid.New().String()
-	var currentId string = firstId
-	var currentListId int
+// Guarda la pestaña actual
+func (as *AppState) saveCurrentTabState(main *layout.Layout) {
+	id := as.currentTab
 
-	showHelpPage := false
-	showTabPage := false
-	fullScreen := false
+	url := main.LeftPanel.Input.GetText()
+	method := main.LeftPanel.DropDown.GetTitle()
 
-	app = tview.NewApplication()
-	mainPage := tview.NewPages() // Contiene toda la UI
+	headers := main.EditorPanel.Header.GetText()
+	queryParams := main.EditorPanel.QueryParam.GetText()
+	pathParams := main.EditorPanel.PathParam.GetText()
+	variables := main.EditorPanel.Variable.GetText()
+	body := main.EditorPanel.Body.GetText()
 
-	main := layout.MainLayout()
-	responseView = main.RightPanel.ResponseView
-	responseInfo = main.RightPanel.ResponseInfo
+	responseBody := main.RightPanel.ResponseView.GetText(true)
+	responseInfo := main.RightPanel.ResponseInfo.GetText(true)
 
-	mainLayout := main.Main
-
-	tabList := component.TabsList()
-
-	// Primer elemento que hace referencia al primer estado de la app
-	tabList.AddItem("Not Found", firstId, 0, nil)
-
-	tabsMap := map[string]Tabs{}
-
-	mainPage.AddPage("main", mainLayout, true, true)
-	mainPage.AddPage("help", component.Help(), true, false)
-	mainPage.AddPage("tab", tabList, true, false)
-	if cli.ActHistory {
-		mainPage.AddPage("history", component.History(app), true, false)
-
+	as.tabs[id] = &Tab{
+		ID:           id,
+		URL:          url,
+		Method:       method,
+		Headers:      headers,
+		QueryParams:  queryParams,
+		PathParams:   pathParams,
+		Variables:    variables,
+		Body:         body,
+		ResponseBody: responseBody,
+		ResponseInfo: responseInfo,
 	}
 
-	requestSender := &events.RequestSender{
-		App:           app,
-		ResponseView:  responseView,
-		ResponseInfo:  responseInfo,
-		ContentToCopy: &contentToCopy,
+	as.updateTabListItem(responseInfo, url)
+
+}
+
+// updateTabListItem actualiza el nombre de la pestaña actual
+func (as *AppState) updateTabListItem(responseInfo, inputText string) {
+	statusCode := strings.SplitN(responseInfo, ",", 2)
+	if len(statusCode) > 0 {
+		mainText := fmt.Sprintf("[#ffffff] [%s] - %s", statusCode[0], inputText)
+		as.tabList.SetItemText(as.currentListID, mainText, as.currentTab)
+	}
+}
+
+// loadTabState carga el estado de la pestaña seleccionada
+func (as *AppState) loadTabState(tab *Tab, main *layout.Layout) {
+	// Limpiar vistas
+	as.responseView.Clear()
+	as.responseInfo.Clear()
+
+	// Cargar datos básicos
+	main.LeftPanel.Input.SetText(tab.URL)
+	main.LeftPanel.DropDown.SetTitle(tab.Method)
+	main.EditorPanel.Header.SetText(tab.Headers, false)
+	main.EditorPanel.QueryParam.SetText(tab.QueryParams, false)
+	main.EditorPanel.PathParam.SetText(tab.PathParams, false)
+	main.EditorPanel.Variable.SetText(tab.Variables, false)
+	main.EditorPanel.Body.SetText(tab.Body, false)
+
+	// Cargar información de respuesta
+	as.loadResponseInfo(tab, main)
+	as.loadResponseBody(tab)
+}
+
+// TODO: Hacer mas accesible el conten type y status code
+
+// loadResponseInfo carga la información de la respuesta HTTP
+func (as *AppState) loadResponseInfo(tab *Tab, main *layout.Layout) {
+	if tab.ResponseInfo == "" {
+		return
 	}
 
-	shortcusts := &shotcust.Shortcuts{
-		App:                    app,
-		MainPage:               mainPage,
+	statusAndContentType := strings.SplitN(tab.ResponseInfo, ",", 2)
+	if len(statusAndContentType) >= 2 {
+		contentType := strings.TrimSpace(strings.Split(statusAndContentType[1], "\n")[0])
+		statusCode := strings.TrimSpace(statusAndContentType[0])
+
+		formattedInfo := utils.ResponseInfoFormat(contentType, tab.URL, statusCode)
+		main.RightPanel.ResponseInfo.SetText(formattedInfo)
+	}
+}
+
+// TODO: Hacer mas accesible el conten type y status code
+
+// loadResponseBody carga el cuerpo de la respuesta HTTP
+func (as *AppState) loadResponseBody(tab *Tab) {
+	if tab.ResponseBody == "" {
+		as.responseView.SetText("")
+		return
+	}
+
+	if tab.ResponseInfo != "" {
+		contentTypeParts := strings.SplitN(tab.ResponseInfo, ",", 2)
+		if len(contentTypeParts) >= 2 {
+			contentType := strings.TrimSpace(contentTypeParts[1])
+			utils.PrettyStyle(contentType, []byte(tab.ResponseBody), as.responseView)
+			return
+		}
+	}
+
+	as.responseView.SetText(tab.ResponseBody)
+}
+
+func (as *AppState) createNewTab() {
+	id := uuid.New().String()
+
+	as.tabs[id] = &Tab{
+		ID:           id,
+		URL:          "",
+		Method:       "",
+		Headers:      "",
+		QueryParams:  "",
+		PathParams:   "",
+		Variables:    "",
+		Body:         "",
+		ResponseBody: "",
+		ResponseInfo: "",
+	}
+
+	as.tabList.AddItem(id, id, 0, nil)
+}
+
+// setupRequestSender configura el enviador de peticiones
+func setupRequestSender(appState *AppState, main *layout.Layout) *events.RequestSender {
+	return &events.RequestSender{
+		App:           appState.app,
+		ResponseView:  appState.responseView,
+		ResponseInfo:  appState.responseInfo,
+		ContentToCopy: &appState.contentToCopy,
+	}
+}
+
+// setupShortcuts configura los atajos de teclado
+func setupShortcuts(appState *AppState, main *layout.Layout, cli *cmd.CliOptions) {
+	requestSender := setupRequestSender(appState, main)
+
+	shortcuts := &shotcust.Shortcuts{
+		App:                    appState.app,
+		MainPage:               appState.mainPage,
 		SwitchPage:             main.EditorPanel.Editor,
 		ResponseFlex:           main.RightPanel.Container,
-		ShowRequestHistoryPage: showHelpPage,
-		ShowHelpPage:           showHelpPage,
+		ShowRequestHistoryPage: appState.showHelpPage,
+		ShowHelpPage:           appState.showHelpPage,
 		RightPanel:             main.RightPanel.Container,
-		ChangeToFullScreen:     fullScreen,
-		ShowTabPage:            showTabPage,
+		ChangeToFullScreen:     appState.fullScreen,
+		ShowTabPage:            &appState.showTabPage,
 
-		CopyFn: func() { clipboard.Copy(contentToCopy) },
+		CopyFn: func() {
+			clipboard.Copy(appState.contentToCopy)
+		},
 		ResponseFn: func() {
 			requestSender.SendRequest(
 				main.LeftPanel.Input,
@@ -100,131 +207,135 @@ func StartApp() {
 				main.EditorPanel.Header,
 				main.EditorPanel.QueryParam,
 				main.EditorPanel.PathParam,
-				main.EditorPanel.Variable, cli.ActHistory)
+				main.EditorPanel.Variable,
+				cli.ActHistory,
+			)
 		},
-		FocusForm: func() { app.SetFocus(main.Form.Container) },
+		FocusForm: func() {
+			appState.app.SetFocus(main.Form.Container)
+		},
 		SaveStateFn: func() {
-			// Este se usa para editar la pestaña actual
-			inputText := main.LeftPanel.Input.GetText()
-			dropDown := main.LeftPanel.DropDown.GetTitle()
-
-			headers := main.EditorPanel.Header.GetText()
-			queryParams := main.EditorPanel.QueryParam.GetText()
-			pathParams := main.EditorPanel.PathParam.GetText()
-			variables := main.EditorPanel.Variable.GetText()
-			body := main.EditorPanel.Body.GetText()
-
-			responseBody := main.RightPanel.ResponseView.GetText(true)
-			responseInfo := main.RightPanel.ResponseInfo.GetText(true)
-
-			tabsMap[currentId] = Tabs{
-				ID:             currentId,
-				Url:            inputText,
-				DropDownOption: dropDown,
-				Headers:        headers,
-				QueryParam:     queryParams,
-				PathParam:      pathParams,
-				Variables:      variables,
-				Body:           body,
-				ResponseBody:   responseBody,
-				ResponseInfo:   responseInfo,
-			}
-
-			statusCode := strings.SplitN(responseInfo, ",", 2)
-			mainText := fmt.Sprintf("[#ffffff] [%s] - %s ", statusCode[0], inputText)
-
-			tabList.SetItemText(currentListId, mainText, currentId)
+			appState.saveCurrentTabState(main)
 		},
 	}
-	shortcusts.RegisterKeys()
 
+	shortcuts.RegisterKeys()
+}
+
+// setupTabListHandlers configura los manejadores de eventos para la lista de pestañas
+func setupTabListHandlers(appState *AppState, main *layout.Layout) {
+	// Manejador de selección de pestaña
+	appState.tabList.SetSelectedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
+		tabID := secondaryText
+		tab, exists := appState.tabs[tabID]
+		if !exists {
+			return
+		}
+
+		appState.currentListID = index
+		appState.currentTab = tabID
+
+		// Cargar estado de la pestaña de forma asíncrona
+		go func() {
+			appState.app.QueueUpdateDraw(func() {
+				appState.loadTabState(tab, main)
+			})
+		}()
+
+		appState.showTabPage = false
+		appState.mainPage.SwitchToPage("main")
+	})
+
+	// Manejador de entrada de teclado
+	appState.tabList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Rune() {
+		case 'a':
+			appState.createNewTab()
+		}
+		return event
+	})
+}
+
+func setupStyles() {
 	tview.Styles.PrimitiveBackgroundColor = tcell.ColorWhite.TrueColor()
 	tview.Styles.ContrastBackgroundColor = tcell.ColorWhite.TrueColor()
 	tview.Styles.MoreContrastBackgroundColor = tcell.ColorBlack.TrueColor()
 	tview.Styles.PrimaryTextColor = tcell.ColorDarkSlateGray.TrueColor()
+}
 
+// NewAppState crea una nueva instancia del estado de la aplicación
+func NewAppState() *AppState {
+	firstID := uuid.New().String()
+
+	return &AppState{
+		app:           tview.NewApplication(),
+		tabs:          make(map[string]*Tab),
+		currentTab:    firstID,
+		currentListID: 0,
+		showHelpPage:  false,
+		showTabPage:   false,
+		fullScreen:    false,
+	}
+}
+
+func (as *AppState) createInitialTab(id string) {
+	as.tabs[id] = &Tab{
+		ID:           id,
+		URL:          "",
+		Method:       "",
+		Headers:      "",
+		QueryParams:  "",
+		PathParams:   "",
+		Variables:    "",
+		Body:         "",
+		ResponseBody: "",
+		ResponseInfo: "",
+	}
+}
+
+func StartApp() {
+	cli := cmd.Launch()
 	if cli.Help {
 		return
 	}
 
-	tabList.SetSelectedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
-		id := secondaryText
-		tab := tabsMap[id]
-		currentListId = index
+	// Crear estado de la aplicación
+	appState := NewAppState()
 
-		// Cada que se selecciona un elemento de la lista con "enter", cambia a la pestaña principal y actualiza los valores
-		go func() {
-			app.QueueUpdateDraw(func() {
+	// Configurar layout principal
+	main := layout.MainLayout()
+	appState.responseView = main.RightPanel.ResponseView
+	appState.responseInfo = main.RightPanel.ResponseInfo
 
-				// Limpio para añadir los estilos
-				responseView.Clear()
-				responseInfo.Clear()
+	// Configurar páginas
+	appState.mainPage = tview.NewPages()
+	appState.tabList = component.TabsList()
 
-				main.LeftPanel.Input.SetText(tab.Url)
-				main.LeftPanel.DropDown.SetTitle(tab.DropDownOption)
-				main.EditorPanel.Header.SetText(tab.Headers, false)
-				main.EditorPanel.QueryParam.SetText(tab.QueryParam, false)
-				main.EditorPanel.PathParam.SetText(tab.PathParam, false)
-				main.EditorPanel.Variable.SetText(tab.Variables, false)
-				main.EditorPanel.Body.SetText(tab.Body, false)
+	// Configurar pestaña inicial
+	appState.createInitialTab(appState.currentTab)
+	appState.tabList.AddItem("Not Found", appState.currentTab, 0, nil)
 
-				if tab.ResponseInfo != "" {
-					statusAndContentType := strings.SplitN(tab.ResponseInfo, ",", 2)
-					f := utils.ResponseInfoFormat(
-						strings.TrimSpace(strings.Split(statusAndContentType[1], "\n")[0]),
-						tab.Url,
-						strings.TrimSpace(statusAndContentType[0]),
-					)
-					main.RightPanel.ResponseInfo.SetText(f)
+	// Agregar páginas
+	appState.mainPage.AddPage("main", main.Main, true, true)
+	appState.mainPage.AddPage("help", component.Help(), true, false)
+	appState.mainPage.AddPage("tab", appState.tabList, true, false)
 
-				}
-
-				if tab.ResponseBody != "" {
-					ct := strings.SplitN(tab.ResponseInfo, ",", 2)
-					utils.PrettyStyle(strings.TrimSpace(ct[1]), []byte(tab.ResponseBody), responseView)
-					return
-				}
-
-				main.RightPanel.ResponseView.SetText(tab.ResponseBody)
-				main.RightPanel.ResponseInfo.SetText(tab.ResponseInfo)
-
-			})
-		}()
-
-		mainPage.SwitchToPage("main")
-		currentId = id
-		shortcusts.ShowTabPage = false
-	})
-
-	tabList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Rune() {
-		case 'a':
-			id := uuid.New().String()
-
-			tabsMap[id] = Tabs{
-				ID:             id,
-				Url:            "",
-				DropDownOption: "",
-				Headers:        "",
-				QueryParam:     "",
-				PathParam:      "",
-				Variables:      "",
-				Body:           "",
-				ResponseBody:   "",
-				ResponseInfo:   "",
-			}
-
-			tabList.AddItem(id, id, 0, nil)
-		}
-
-		return event
-
-	})
-
-	main.EditorPanel.Variable.SetText(logic.ReadEnvFile(cli.EnvFilePath), false)
-
-	if err := app.SetRoot(mainPage, true).EnableMouse(true).Run(); err != nil {
-		panic(err)
+	if cli.ActHistory {
+		appState.mainPage.AddPage("history", component.History(appState.app), true, false)
 	}
 
+	// Configurar eventos y atajos
+	setupRequestSender(appState, main)
+	setupShortcuts(appState, main, &cli)
+	setupTabListHandlers(appState, main)
+
+	// Configurar variables de entorno
+	main.EditorPanel.Variable.SetText(logic.ReadEnvFile(cli.EnvFilePath), false)
+
+	// Configurar estilos y ejecutar
+	setupStyles()
+
+	if err := appState.app.SetRoot(appState.mainPage, true).EnableMouse(true).Run(); err != nil {
+		panic(err)
+	}
 }
