@@ -7,5 +7,8 @@ const (
 	Json     = "json"             // json
 	JsonLong = "application/json" // application/json
 
+	Csv     = "csv"      // csv
+	CsvLong = "text/csv" // text/csv
+
 	PlainText = "plaintext" // plaintext
 )
