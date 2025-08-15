@@ -14,10 +14,12 @@ type Shortcuts struct {
 	CopyFn       func()
 	FocusForm    func()
 	ResponseFn   func()
+	SaveStateFn  func()
 
 	ShowHelpPage           bool
 	ShowRequestHistoryPage bool
 	ChangeToFullScreen     bool
+	ShowTabPage            bool
 }
 
 func (s *Shortcuts) RegisterKeys() {
@@ -58,7 +60,7 @@ func (s *Shortcuts) RegisterKeys() {
 				s.ShowHelpPage = false
 				s.MainPage.SwitchToPage("main")
 			} else {
-				s.ShowHelpPage = false
+				s.ShowHelpPage = true
 				s.MainPage.SwitchToPage("help")
 			}
 
@@ -70,6 +72,16 @@ func (s *Shortcuts) RegisterKeys() {
 			} else {
 				s.ShowRequestHistoryPage = true
 				s.MainPage.SwitchToPage("history")
+			}
+
+		case tcell.KeyF3:
+			if s.ShowTabPage {
+				s.ShowTabPage = false
+				s.MainPage.SwitchToPage("main")
+			} else {
+				s.ShowTabPage = true
+				s.MainPage.SwitchToPage("tab")
+				s.SaveStateFn()
 			}
 		}
 
