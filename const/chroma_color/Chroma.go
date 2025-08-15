@@ -1,5 +1,5 @@
 package chromacolor
 
 const (
-	Highlight = "onedark"
+	Highlight = "github-dark"
 )
