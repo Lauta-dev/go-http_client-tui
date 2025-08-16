@@ -59,6 +59,10 @@ func NewAppState() *AppState {
 	}
 }
 
+func (as *AppState) SetTabList(tabInfo component.TabListBuilder) {
+	as.tabInfo = &tabInfo
+}
+
 // SetShowTabPage establece el estado de la página de pestañas
 func (as *AppState) SetShowTabPage(show bool) {
 	as.showTabPage = show

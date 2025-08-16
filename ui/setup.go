@@ -33,12 +33,12 @@ func (setup *AppSetup) SetupPages(main *layout.Layout, cli *cmd.CliOptions) {
 
 	// Configurar pestaña inicial
 	setup.tabManager.CreateInitialTab(setup.appState.currentTab)
-	tabList.AddItem("Not Found", setup.appState.currentTab, 0, nil)
+	tabList.List.AddItem("Not Found", setup.appState.currentTab, 0, nil)
 
 	// Agregar páginas
 	setup.appState.mainPage.AddPage("main", main.Main, true, true)
 	setup.appState.mainPage.AddPage("help", component.Help(), true, false)
-	setup.appState.mainPage.AddPage("tab", tabList, true, false)
+	setup.appState.mainPage.AddPage("tab", tabList.Container, true, false)
 
 	if cli.ActHistory {
 		setup.appState.mainPage.AddPage("history", component.History(setup.appState.app), true, false)
