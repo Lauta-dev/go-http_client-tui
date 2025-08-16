@@ -4,11 +4,13 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/google/uuid"
 	"github.com/rivo/tview"
+	component "http_client/ui/components"
 )
 
 // Tab representa una pestaña con toda la información de una petición HTTP
 type Tab struct {
 	ID           string
+	CustomName   string
 	URL          string
 	Method       string
 	Headers      string
@@ -24,9 +26,11 @@ type Tab struct {
 type AppState struct {
 	app           *tview.Application
 	mainPage      *tview.Pages
+	tabInfoPage   *tview.Pages
 	responseView  *tview.TextView
 	responseInfo  *tview.TextView
 	contentToCopy string
+	tabInfo       *component.TabListBuilder
 
 	// Estado de pestañas
 	currentTab    string
