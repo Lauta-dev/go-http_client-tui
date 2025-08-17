@@ -2,9 +2,11 @@ package ui
 
 import (
 	"fmt"
+	"strings"
+
+	color "http_client/const/color_wrapper"
 	"http_client/ui/layout"
 	"http_client/utils"
-	"strings"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/google/uuid"
@@ -35,13 +37,14 @@ func (tm *TabManager) CreateInitialTab(id string) {
 		Body:         "",
 		ResponseBody: "",
 		ResponseInfo: "",
+		CustomName:   "",
 	}
 }
 
 // SaveCurrentTabState guarda el estado actual de la pestaña activa
 func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
 	inputText := main.LeftPanel.Input.GetText()
-	method := main.LeftPanel.DropDown.GetTitle()
+	_, method := main.LeftPanel.DropDown.GetCurrentOption()
 	headers := main.EditorPanel.Header.GetText()
 	queryParams := main.EditorPanel.QueryParam.GetText()
 	pathParams := main.EditorPanel.PathParam.GetText()
@@ -50,7 +53,10 @@ func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
 	responseBody := main.RightPanel.ResponseView.GetText(true)
 	responseInfo := main.RightPanel.ResponseInfo.GetText(true)
 
-	tm.appState.tabs[tm.appState.currentTab] = &Tab{
+	tabs := tm.appState.tabs
+	currentTab := tm.appState.currentTab
+
+	tabs[currentTab] = &Tab{
 		ID:           tm.appState.currentTab,
 		URL:          inputText,
 		Method:       method,
@@ -61,6 +67,12 @@ func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
 		Body:         body,
 		ResponseBody: responseBody,
 		ResponseInfo: responseInfo,
+		CustomName:   tabs[currentTab].CustomName,
+	}
+
+	if tabs[currentTab].CustomName != "" {
+		tm.updateTabListItem(responseInfo, tabs[currentTab].CustomName)
+		return
 	}
 
 	tm.updateTabListItem(responseInfo, inputText)
@@ -70,7 +82,8 @@ func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
 func (tm *TabManager) updateTabListItem(responseInfo, inputText string) {
 	statusCode := strings.SplitN(responseInfo, ",", 2)
 	if len(statusCode) > 0 {
-		mainText := fmt.Sprintf("[#ffffff] [%s] - %s", statusCode[0], inputText)
+		// [Color del texto] [Estado de la Request] "Nombre de el item"
+		mainText := fmt.Sprintf("[%s] [%s] - %s ", color.ColorTextPrimary.String(), statusCode[0], inputText)
 		tm.appState.tabList.SetItemText(tm.appState.currentListID, mainText, tm.appState.currentTab)
 	}
 }
@@ -145,40 +158,106 @@ func (tm *TabManager) CreateNewTab() {
 		Body:         "",
 		ResponseBody: "",
 		ResponseInfo: "",
+		CustomName:   "",
 	}
 
-	tm.appState.tabList.AddItem(id, id, 0, nil)
+	tm.appState.tabList.AddItem(" "+id+" ", id, 0, nil)
 }
 
 // SetupTabListHandlers configura los manejadores de eventos para la lista de pestañas
 func (tm *TabManager) SetupTabListHandlers(main *layout.Layout) {
+	list := tm.appState.tabList
+	tabs := tm.appState.tabs
+	as := tm.appState
+
+	if list == nil {
+		return
+	}
+
+	var id int
+	var tabId string
+
 	// Manejador de selección de pestaña
-	tm.appState.tabList.SetSelectedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
+	list.SetSelectedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
 		tabID := secondaryText
-		tab, exists := tm.appState.tabs[tabID]
+		tab, exists := tabs[tabID]
 		if !exists {
 			return
 		}
 
-		tm.appState.currentListID = index
-		tm.appState.currentTab = tabID
+		as.currentListID = index
+		as.currentTab = tabID
 
 		// Cargar estado de la pestaña de forma asíncrona
 		go func() {
-			tm.appState.app.QueueUpdateDraw(func() {
+			as.app.QueueUpdateDraw(func() {
 				tm.LoadTabState(tab, main)
 			})
 		}()
 
-		tm.appState.mainPage.SwitchToPage("main")
-		tm.appState.showTabPage = false
+		as.mainPage.SwitchToPage("main")
+		as.showTabPage = false
+
+		tabId = secondaryText
+		id = index
+	})
+
+	list.SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
+		tabId = secondaryText
+		id = index
+
+		tab := tabs[secondaryText]
+
+		if tab.URL == "" {
+			as.tabInfo.TextArea.SetText("Por favor, haga una Request")
+			return
+		}
+
+		info := fmt.Sprintf("URL: %s\nMétodo: %s\n\n%s", tab.URL, tab.Method, tab.ResponseBody)
+		as.tabInfo.TextArea.SetText(info)
 	})
 
 	// Manejador de entrada de teclado
-	tm.appState.tabList.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Rune() {
 		case 'a':
 			tm.CreateNewTab()
+		case 'e':
+
+			if tabId == "" {
+				return nil
+			}
+
+			tabInfo := as.tabInfo
+			tabInfo.DetailsPage.SwitchToPage("edit-item")
+			as.app.SetFocus(as.tabInfo.Input)
+
+			tabInfo.DetailsPage.SetTitle(" > Edición | 'ENTER' para asignar 'ESC' para salir ")
+			tabInfo.Input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+				switch event.Key() {
+				case tcell.KeyEnter:
+					newText := tabInfo.Input.GetText()
+
+					if newText == "" {
+						return nil
+					}
+
+					tabs[tabId].CustomName = newText
+
+					tabInfo.List.SetItemText(id, " "+newText+" ", tabId)
+					tabInfo.DetailsPage.SwitchToPage("info")
+					as.app.SetFocus(tabInfo.List)
+					tabInfo.Input.SetText("")
+
+				case tcell.KeyEsc:
+					tabInfo.DetailsPage.SwitchToPage("info")
+					tabInfo.DetailsPage.SetTitle(" > Info | 'E' para editar item ")
+					as.app.SetFocus(tabInfo.List)
+					tabInfo.Input.SetText("")
+				}
+				return event
+			})
+
 		}
 		return event
 	})

@@ -30,6 +30,7 @@ func (setup *AppSetup) SetupPages(main *layout.Layout, cli *cmd.CliOptions) {
 	setup.appState.SetMainPage(tview.NewPages())
 	tabList := component.TabsList()
 	setup.appState.SetTabList(tabList)
+	setup.appState.tabList = tabList.List
 
 	// Configurar pestaña inicial
 	setup.tabManager.CreateInitialTab(setup.appState.currentTab)

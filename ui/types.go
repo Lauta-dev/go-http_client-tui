@@ -94,11 +94,6 @@ func (as *AppState) SetResponseViews(responseView, responseInfo *tview.TextView)
 	as.responseInfo = responseInfo
 }
 
-// SetTabList establece la lista de pestañas
-func (as *AppState) SetTabList(tabList *tview.List) {
-	as.tabList = tabList
-}
-
 // setupStyles configura los estilos de la aplicación
 func SetupStyles() {
 	tview.Styles.PrimitiveBackgroundColor = tcell.ColorWhite.TrueColor()
