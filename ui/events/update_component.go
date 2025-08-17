@@ -49,11 +49,11 @@ func (ui *UIController) displayResponse(res logic.Fetch, saveRequest bool, metho
 	ui.App.QueueUpdateDraw(func() {
 		ui.clearResponses()
 
-		format := utils.ResponseInfoFormat(res.ContentType, res.UserUrl, res.Status)
-		code := strings.Split(res.Status, " ")[0]
+		format := utils.ResponseInfoFormat(res.ContentType, res.URL, res.StatusCodeText)
+		code := strings.Split(res.StatusCodeText, " ")[0]
 
 		if saveRequest {
-			if err := logic.SaveItems(res.UserUrl, code, res.ContentType, res.Body, method); err != nil {
+			if err := logic.SaveItems(res.URL, code, res.ContentType, res.Body, method); err != nil {
 				fmt.Fprintf(ui.ResponseInfo, "[red]%s", err.Error())
 			}
 		}

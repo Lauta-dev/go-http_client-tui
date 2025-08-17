@@ -8,10 +8,11 @@ import (
 )
 
 type Fetch struct {
-	Status      string
-	ContentType string
-	Body        string
-	UserUrl     string
+	ContentType    string
+	Body           string
+	URL            string
+	StatusCodeText string
+	StatusCode     int
 }
 
 func AddPathParam(params []string, baseURL string) string {
@@ -80,13 +81,13 @@ func Fetching(
 	}
 
 	bodyToString := string(bodyByte)
-	status := res.Status
 	contentType := res.Header.Get("Content-Type")
 
 	return Fetch{
-		Status:      status,
-		Body:        bodyToString,
-		ContentType: contentType,
-		UserUrl:     userUrl,
+		Body:           bodyToString,
+		ContentType:    contentType,
+		URL:            userUrl,
+		StatusCodeText: res.Status,
+		StatusCode:     res.StatusCode,
 	}, nil
 }
