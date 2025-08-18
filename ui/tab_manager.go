@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	color "http_client/const/color_wrapper"
@@ -11,6 +12,12 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/google/uuid"
 )
+
+// TODO: Hacer un correcto formateo de los items, si se añade uno ya tenga el estilos "[200] - CustomName"
+// Si se edita el texto lo mismo debe tener el mismo estilo
+
+//TODO: También crear opción para eliminar pestaña
+// TETAS >>>>> CULOS
 
 // TabManager maneja todas las operaciones relacionadas con pestañas
 type TabManager struct {
@@ -27,22 +34,38 @@ func NewTabManager(appState *AppState) *TabManager {
 // CreateInitialTab crea la primera pestaña de la aplicación
 func (tm *TabManager) CreateInitialTab(id string) {
 	tm.appState.tabs[id] = &Tab{
-		ID:           id,
-		URL:          "",
-		Method:       "",
-		Headers:      "",
-		QueryParams:  "",
-		PathParams:   "",
-		Variables:    "",
-		Body:         "",
-		ResponseBody: "",
-		ResponseInfo: "",
-		CustomName:   "",
+		ID:             id,
+		URL:            "",
+		Method:         "",
+		Headers:        "",
+		QueryParams:    "",
+		PathParams:     "",
+		Variables:      "",
+		Body:           "",
+		ResponseBody:   "",
+		ResponseInfo:   "",
+		CustomName:     "",
+		StatusCodeText: "",
+		StatusCode:     0,
+		ContentType:    "",
 	}
+}
+
+func ItemNameFormat(statusCodeText, inputText string) string {
+	return fmt.Sprintf(
+		"[%s] [%s] - %s ",
+		color.ColorTextPrimary.String(),
+		statusCodeText,
+		inputText,
+	)
 }
 
 // SaveCurrentTabState guarda el estado actual de la pestaña activa
 func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
+	if tm.appState == nil {
+		return
+	}
+
 	inputText := main.LeftPanel.Input.GetText()
 	_, method := main.LeftPanel.DropDown.GetCurrentOption()
 	headers := main.EditorPanel.Header.GetText()
@@ -53,39 +76,98 @@ func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
 	responseBody := main.RightPanel.ResponseView.GetText(true)
 	responseInfo := main.RightPanel.ResponseInfo.GetText(true)
 
-	tabs := tm.appState.tabs
-	currentTab := tm.appState.currentTab
+	var contentType string = ""
+	var statusCodeText string = ""
+	var statusCode int = 0
 
-	tabs[currentTab] = &Tab{
-		ID:           tm.appState.currentTab,
-		URL:          inputText,
-		Method:       method,
-		Headers:      headers,
-		QueryParams:  queryParams,
-		PathParams:   pathParams,
-		Variables:    variables,
-		Body:         body,
-		ResponseBody: responseBody,
-		ResponseInfo: responseInfo,
-		CustomName:   tabs[currentTab].CustomName,
+	if responseInfo != "" {
+		// [200 OK, text/html] [https://example.com]
+		t := strings.SplitN(responseInfo, "\n", 2)
+
+		// [200 OK] [text/html]
+		d := strings.SplitN(t[0], ",", 2)
+
+		contentType = strings.TrimSpace(d[1])                         // text/html
+		statusCodeText = strings.TrimSpace(d[0])                      // 200 OK
+		statusCode, _ = strconv.Atoi(strings.SplitN(d[0], " ", 2)[0]) // 200 "int"
 	}
 
-	if tabs[currentTab].CustomName != "" {
-		tm.updateTabListItem(responseInfo, tabs[currentTab].CustomName)
+	tabs := tm.appState.tabs
+	currentTab := tm.appState.currentTab
+	tab, exists := tm.appState.tabs[currentTab]
+
+	if !exists {
 		return
 	}
 
-	tm.updateTabListItem(responseInfo, inputText)
+	tabs[currentTab] = &Tab{
+		ID:             currentTab,
+		URL:            inputText,
+		Method:         method,
+		Headers:        headers,
+		QueryParams:    queryParams,
+		PathParams:     pathParams,
+		Variables:      variables,
+		Body:           body,
+		ResponseBody:   responseBody,
+		ResponseInfo:   responseInfo,
+		CustomName:     tab.CustomName,
+		StatusCodeText: statusCodeText,
+		StatusCode:     statusCode,
+		ContentType:    contentType,
+	}
+
+	if tab.CustomName != "" {
+		f := ItemNameFormat(tab.StatusCodeText, tab.CustomName)
+		tm.updateTabListItem(f)
+		tm.showRequestInfo(currentTab)
+		return
+	}
+
+	if inputText == "" && statusCodeText == "" {
+		tm.updateTabListItem("" + currentTab + "")
+		return
+	}
+
+	f := ItemNameFormat(statusCodeText, inputText)
+
+	tm.showRequestInfo(currentTab)
+	tm.updateTabListItem(f)
+}
+
+func (tm *TabManager) showRequestInfo(id string) {
+
+	if tm.appState == nil {
+		return
+	}
+
+	as := tm.appState
+	tabs := tm.appState.tabs
+
+	tab, exists := tabs[id]
+
+	if !exists {
+		return
+	}
+
+	if tab.URL == "" {
+		as.tabInfo.TextArea.SetText("Por favor, haga una Request")
+		return
+	}
+
+	info := fmt.Sprintf("URL: %s\nMétodo: %s\nTipo de contenido: %s\nCódigo: %s\n\n%s",
+		tab.URL,
+		tab.Method,
+		tab.ContentType,
+		tab.StatusCodeText,
+		tab.ResponseBody,
+	)
+	as.tabInfo.TextArea.SetText(info)
 }
 
 // updateTabListItem actualiza el texto mostrado en la lista de pestañas
-func (tm *TabManager) updateTabListItem(responseInfo, inputText string) {
-	statusCode := strings.SplitN(responseInfo, ",", 2)
-	if len(statusCode) > 0 {
-		// [Color del texto] [Estado de la Request] "Nombre de el item"
-		mainText := fmt.Sprintf("[%s] [%s] - %s ", color.ColorTextPrimary.String(), statusCode[0], inputText)
-		tm.appState.tabList.SetItemText(tm.appState.currentListID, mainText, tm.appState.currentTab)
-	}
+func (tm *TabManager) updateTabListItem(mainText string) {
+	tm.appState.tabList.SetItemText(tm.appState.currentListID, mainText, tm.appState.currentTab)
 }
 
 // LoadTabState carga el estado de una pestaña específica
@@ -132,12 +214,9 @@ func (tm *TabManager) loadResponseBody(tab *Tab) {
 	}
 
 	if tab.ResponseInfo != "" {
-		contentTypeParts := strings.SplitN(tab.ResponseInfo, ",", 2)
-		if len(contentTypeParts) >= 2 {
-			contentType := strings.TrimSpace(contentTypeParts[1])
-			utils.PrettyStyle(contentType, []byte(tab.ResponseBody), tm.appState.responseView)
-			return
-		}
+		tab := tm.appState.tabs[tm.appState.currentTab]
+		utils.PrettyStyle(tab.ContentType, []byte(tab.ResponseBody), tm.appState.responseView)
+		return
 	}
 
 	tm.appState.responseView.SetText(tab.ResponseBody)
@@ -148,17 +227,20 @@ func (tm *TabManager) CreateNewTab() {
 	id := uuid.New().String()
 
 	tm.appState.tabs[id] = &Tab{
-		ID:           id,
-		URL:          "",
-		Method:       "",
-		Headers:      "",
-		QueryParams:  "",
-		PathParams:   "",
-		Variables:    "",
-		Body:         "",
-		ResponseBody: "",
-		ResponseInfo: "",
-		CustomName:   "",
+		ID:             id,
+		URL:            "",
+		Method:         "",
+		Headers:        "",
+		QueryParams:    "",
+		PathParams:     "",
+		Variables:      "",
+		Body:           "",
+		ResponseBody:   "",
+		ResponseInfo:   "",
+		CustomName:     "",
+		StatusCodeText: "",
+		StatusCode:     0,
+		ContentType:    "",
 	}
 
 	tm.appState.tabList.AddItem(" "+id+" ", id, 0, nil)
@@ -166,6 +248,11 @@ func (tm *TabManager) CreateNewTab() {
 
 // SetupTabListHandlers configura los manejadores de eventos para la lista de pestañas
 func (tm *TabManager) SetupTabListHandlers(main *layout.Layout) {
+
+	if tm == nil || tm.appState == nil || main == nil {
+		return
+	}
+
 	list := tm.appState.tabList
 	tabs := tm.appState.tabs
 	as := tm.appState
@@ -203,18 +290,9 @@ func (tm *TabManager) SetupTabListHandlers(main *layout.Layout) {
 	})
 
 	list.SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
+		tm.showRequestInfo(secondaryText)
 		tabId = secondaryText
 		id = index
-
-		tab := tabs[secondaryText]
-
-		if tab.URL == "" {
-			as.tabInfo.TextArea.SetText("Por favor, haga una Request")
-			return
-		}
-
-		info := fmt.Sprintf("URL: %s\nMétodo: %s\n\n%s", tab.URL, tab.Method, tab.ResponseBody)
-		as.tabInfo.TextArea.SetText(info)
 	})
 
 	// Manejador de entrada de teclado
@@ -241,10 +319,12 @@ func (tm *TabManager) SetupTabListHandlers(main *layout.Layout) {
 					if newText == "" {
 						return nil
 					}
+					tab := tabs[tabId]
+					mainText := ItemNameFormat(tab.StatusCodeText, newText)
 
-					tabs[tabId].CustomName = newText
+					tab.CustomName = newText
 
-					tabInfo.List.SetItemText(id, " "+newText+" ", tabId)
+					tabInfo.List.SetItemText(id, mainText, tabId)
 					tabInfo.DetailsPage.SwitchToPage("info")
 					as.app.SetFocus(tabInfo.List)
 					tabInfo.Input.SetText("")

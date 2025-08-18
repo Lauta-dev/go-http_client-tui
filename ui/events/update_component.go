@@ -11,11 +11,13 @@ import (
 )
 
 type UIController struct {
-	App           *tview.Application
-	ResponseView  *tview.TextView
-	ResponseInfo  *tview.TextView
-	ContentToCopy *string // puntero para actualizar desde la función
+	App          *tview.Application
+	ResponseView *tview.TextView
+	ResponseInfo *tview.TextView
 
+	ContentToCopy  *string // Body de la Request
+	StatusCodeText string  // Ej OK 200
+	StatusCode     int     // Ej 200
 }
 
 func (ui *UIController) clearResponses() {
@@ -62,6 +64,8 @@ func (ui *UIController) displayResponse(res logic.Fetch, saveRequest bool, metho
 
 		display, err := utils.PrettyStyle(res.ContentType, []byte(res.Body), ui.ResponseView)
 		ui.ContentToCopy = &display
+		ui.StatusCodeText = res.StatusCodeText
+		ui.StatusCode = res.StatusCode
 
 		if err != nil {
 			ui.ResponseView.Clear()
@@ -76,7 +80,8 @@ func (ui *UIController) UpdateComponent(
 	queryParams map[string]string,
 	params []string,
 	body string,
-	userUrl string, saveRequest bool) {
+	userUrl string, saveRequest bool,
+) {
 
 	ui.showLoading()
 

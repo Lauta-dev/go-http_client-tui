@@ -9,28 +9,33 @@ import (
 
 // Tab representa una pestaña con toda la información de una petición HTTP
 type Tab struct {
-	ID           string
-	CustomName   string
-	URL          string
-	Method       string
-	Headers      string
-	QueryParams  string
-	PathParams   string
-	Variables    string
-	Body         string
-	ResponseBody string
-	ResponseInfo string
+	ID             string
+	CustomName     string
+	URL            string
+	Method         string
+	Headers        string
+	QueryParams    string
+	PathParams     string
+	Variables      string
+	Body           string
+	ResponseBody   string
+	ResponseInfo   string
+	StatusCodeText string
+	StatusCode     int
+	ContentType    string
 }
 
 // AppState mantiene el estado global de la aplicación
 type AppState struct {
-	app           *tview.Application
-	mainPage      *tview.Pages
-	tabInfoPage   *tview.Pages
-	responseView  *tview.TextView
-	responseInfo  *tview.TextView
+	app          *tview.Application
+	mainPage     *tview.Pages
+	tabInfoPage  *tview.Pages
+	responseView *tview.TextView
+	responseInfo *tview.TextView
+	tabInfo      *component.TabListBuilder
+
+	// Infor de la request
 	contentToCopy string
-	tabInfo       *component.TabListBuilder
 
 	// Estado de pestañas
 	currentTab    string

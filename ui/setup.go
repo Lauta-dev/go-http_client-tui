@@ -85,6 +85,7 @@ func (setup *AppSetup) SetupShortcuts(main *layout.Layout, cli *cmd.CliOptions) 
 				main.EditorPanel.Variable,
 				cli.ActHistory,
 			)
+
 		},
 		FocusForm: func() {
 			setup.appState.app.SetFocus(main.Form.Container)
@@ -101,3 +102,4 @@ func (setup *AppSetup) SetupShortcuts(main *layout.Layout, cli *cmd.CliOptions) 
 func (setup *AppSetup) SetupEventHandlers(main *layout.Layout) {
 	setup.tabManager.SetupTabListHandlers(main)
 }
+

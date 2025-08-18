@@ -6,10 +6,13 @@ import (
 )
 
 type RequestSender struct {
-	App           *tview.Application
-	ResponseView  *tview.TextView
-	ResponseInfo  *tview.TextView
-	ContentToCopy *string
+	App          *tview.Application
+	ResponseView *tview.TextView
+	ResponseInfo *tview.TextView
+
+	ContentToCopy  *string
+	StatusCodeText string // Ej OK 200
+	StatusCode     int    // Ej 200
 }
 
 func (rs *RequestSender) SendRequest(
