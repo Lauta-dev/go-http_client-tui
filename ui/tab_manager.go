@@ -125,7 +125,7 @@ func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
 	}
 
 	if inputText == "" && statusCodeText == "" {
-		tm.updateTabListItem("" + currentTab + "")
+		tm.updateTabListItem(" " + currentTab + " ")
 		return
 	}
 
