@@ -37,6 +37,7 @@ func (tm *TabManager) CreateInitialTab(id string) {
 		ID:             id,
 		URL:            "",
 		Method:         "",
+		MethodID:       0,
 		Headers:        "",
 		QueryParams:    "",
 		PathParams:     "",
@@ -67,7 +68,7 @@ func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
 	}
 
 	inputText := main.LeftPanel.Input.GetText()
-	_, method := main.LeftPanel.DropDown.GetCurrentOption()
+	methodId, method := main.LeftPanel.DropDown.GetCurrentOption()
 	headers := main.EditorPanel.Header.GetText()
 	queryParams := main.EditorPanel.QueryParam.GetText()
 	pathParams := main.EditorPanel.PathParam.GetText()
@@ -104,6 +105,7 @@ func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
 		ID:             currentTab,
 		URL:            inputText,
 		Method:         method,
+		MethodID:       methodId,
 		Headers:        headers,
 		QueryParams:    queryParams,
 		PathParams:     pathParams,
@@ -178,7 +180,7 @@ func (tm *TabManager) LoadTabState(tab *Tab, main *layout.Layout) {
 
 	// Cargar datos básicos
 	main.LeftPanel.Input.SetText(tab.URL)
-	main.LeftPanel.DropDown.SetTitle(tab.Method)
+	main.LeftPanel.DropDown.SetCurrentOption(tab.MethodID)
 	main.EditorPanel.Header.SetText(tab.Headers, false)
 	main.EditorPanel.QueryParam.SetText(tab.QueryParams, false)
 	main.EditorPanel.PathParam.SetText(tab.PathParams, false)
@@ -230,6 +232,7 @@ func (tm *TabManager) CreateNewTab() {
 		ID:             id,
 		URL:            "",
 		Method:         "",
+		MethodID:       0,
 		Headers:        "",
 		QueryParams:    "",
 		PathParams:     "",

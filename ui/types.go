@@ -13,6 +13,7 @@ type Tab struct {
 	CustomName     string
 	URL            string
 	Method         string
+	MethodID       int
 	Headers        string
 	QueryParams    string
 	PathParams     string
