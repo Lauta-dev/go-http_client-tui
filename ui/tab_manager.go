@@ -101,9 +101,11 @@ func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
 		return
 	}
 
+	url, _ := utils.ParseInput(inputText, utils.ParseHeader(variables))
+
 	tabs[currentTab] = &Tab{
 		ID:             currentTab,
-		URL:            inputText,
+		URL:            url,
 		Method:         method,
 		MethodID:       methodId,
 		Headers:        headers,
