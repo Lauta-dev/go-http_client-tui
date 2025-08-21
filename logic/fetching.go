@@ -2,6 +2,7 @@ package logic
 
 import (
 	"bytes"
+	"http_client/utils"
 	"io"
 	"net/http"
 	"net/url"
@@ -15,31 +16,6 @@ type Fetch struct {
 	StatusCode     int
 }
 
-func AddPathParam(params []string, baseURL string) string {
-	pathParam := ""
-	for _, v := range params {
-		pathParam += "/" + v
-	}
-
-	return baseURL + pathParam
-}
-
-func addQueryParam(u *url.URL, qp map[string]string) *url.URL {
-	q := u.Query()
-
-	for k, v := range qp {
-		if q.Get(k) == "" {
-			q.Add(k, v)
-
-		} else {
-			q.Set(k, v)
-		}
-	}
-
-	u.RawQuery = q.Encode()
-	return u
-}
-
 func Fetching(
 	userUrl string,
 	verb string,
@@ -47,7 +23,8 @@ func Fetching(
 	qp map[string]string,
 	p []string,
 	body string) (Fetch, error) {
-	baseURL := AddPathParam(p, userUrl)
+
+	baseURL := utils.AddPathParam(p, userUrl)
 	u, err := url.Parse(baseURL)
 
 	if err != nil {
@@ -55,11 +32,8 @@ func Fetching(
 		return Fetch{}, err
 	}
 
-	finalURL := addQueryParam(u, qp)
-
-	userUrl = finalURL.String()
-
-	req, err := http.NewRequest(verb, userUrl, bytes.NewBuffer([]byte(body)))
+	URL := utils.AddQueryParam(u, qp)
+	req, err := http.NewRequest(verb, URL, bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return Fetch{}, err
 	}
@@ -86,7 +60,7 @@ func Fetching(
 	return Fetch{
 		Body:           bodyToString,
 		ContentType:    contentType,
-		URL:            userUrl,
+		URL:            URL,
 		StatusCodeText: res.Status,
 		StatusCode:     res.StatusCode,
 	}, nil
