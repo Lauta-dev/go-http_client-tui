@@ -31,7 +31,7 @@ func (rs *RequestSender) SendRequest(
 	queryParams := utils.ParseHeader(queryParamPage.GetText())
 	params := utils.ParsePathParams(pathParamPage.GetText())
 
-	url, err := utils.ParseInput(formInput.GetText(), utils.ParseHeader(varr.GetText()))
+	url, err := utils.ReplaceVariablesInURL(formInput.GetText(), utils.ParseHeader(varr.GetText()))
 
 	if err != nil {
 		triggerErrorAfterRequest := &RequestError{
