@@ -89,6 +89,7 @@ func (ui *UIController) UpdateComponent(
 
 	if err != nil {
 		ui.showError(err)
+		return
 	}
 
 	ui.displayResponse(res, saveRequest, httpMethod)
