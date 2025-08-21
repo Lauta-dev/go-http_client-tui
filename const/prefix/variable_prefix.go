@@ -1,0 +1,3 @@
+package prefix
+
+var VariablePrefix = "@"
