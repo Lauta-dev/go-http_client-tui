@@ -16,7 +16,7 @@ import (
 // TODO: Hacer un correcto formateo de los items, si se añade uno ya tenga el estilos "[200] - CustomName"
 // Si se edita el texto lo mismo debe tener el mismo estilo
 
-//TODO: También crear opción para eliminar pestaña
+// TODO: También crear opción para eliminar pestaña
 // TETAS >>>>> CULOS
 
 // TabManager maneja todas las operaciones relacionadas con pestañas
@@ -101,11 +101,9 @@ func (tm *TabManager) SaveCurrentTabState(main *layout.Layout) {
 		return
 	}
 
-	url, _ := utils.ParseInput(inputText, utils.ParseHeader(variables))
-
 	tabs[currentTab] = &Tab{
 		ID:             currentTab,
-		URL:            url,
+		URL:            inputText,
 		Method:         method,
 		MethodID:       methodId,
 		Headers:        headers,
@@ -159,8 +157,19 @@ func (tm *TabManager) showRequestInfo(id string) {
 		return
 	}
 
-	info := fmt.Sprintf("URL: %s\nMétodo: %s\nTipo de contenido: %s\nCódigo: %s\n\n%s",
+	c, err := utils.ParseUrl(
+		tab.Variables,
 		tab.URL,
+		utils.ParseHeader(tab.QueryParams),
+		utils.ParsePathParams(tab.PathParams),
+	)
+
+	if err != nil {
+		c = tab.URL
+	}
+
+	info := fmt.Sprintf("URL: %s\nMétodo: %s\nTipo de contenido: %s\nCódigo: %s\n\n%s",
+		c,
 		tab.Method,
 		tab.ContentType,
 		tab.StatusCodeText,
@@ -294,6 +303,7 @@ func (tm *TabManager) SetupTabListHandlers(main *layout.Layout) {
 		id = index
 	})
 
+	// Cambia la información de la Request al cambiar de item
 	list.SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
 		tm.showRequestInfo(secondaryText)
 		tabId = secondaryText
