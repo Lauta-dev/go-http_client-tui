@@ -1,52 +1,36 @@
 package utils
 
 import (
+	"http_client/const/prefix"
 	"os"
 	"strings"
 )
 
-func ParseHeadera(str string, variables map[string]string) map[string]string {
+func ParseHeaders(str string, variables map[string]string) map[string]string {
+	headers := ParseKeyValueText(str)
 	headersMap := make(map[string]string)
-	prefix := "#"
-	varPrefix := "@"
 
-	if str == "" {
-		return headersMap
-	}
+	for k, v := range headers {
+		var key string = k
+		var value string = v
 
-	headers := strings.Split(str, "\n")
-
-	for _, h := range headers {
-		if strings.HasPrefix(h, prefix) {
-			continue
-		}
-
-		parts := strings.SplitN(strings.TrimSpace(h), ": ", 2)
-
-		if len(parts) != 2 {
-			continue
-		}
-
-		key := strings.TrimSpace(parts[0])
-		value := strings.TrimSpace(parts[1])
-
-		if strings.HasPrefix(value, varPrefix) {
+		if strings.HasPrefix(v, prefix.VariablePrefix) {
 			// Examinar las variables en la pesantañ de variables
 			// Examinar os.GetEnv("")
-			removePrefix := value[1:]
-			if variables[removePrefix] != "" {
-				value = variables[removePrefix]
+			keyWithoutPrefix := v[1:]
+			if variable := variables[keyWithoutPrefix]; variable != "" {
+				value = variable
 			}
 
-			if os.Getenv(removePrefix) != "" {
-				value = os.Getenv(removePrefix)
+			if env := os.Getenv(keyWithoutPrefix); env != "" {
+				value = env
 			}
 
 		}
 
 		// Si value sigue teniendo el prefix de @, pasa a la siguiente iteracion
 		// Esto es porque el anterior if cambia el valor de "value"
-		if strings.HasPrefix(value, varPrefix) {
+		if strings.HasPrefix(value, prefix.VariablePrefix) {
 			continue
 		}
 
