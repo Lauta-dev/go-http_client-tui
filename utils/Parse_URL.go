@@ -70,7 +70,7 @@ func AddQueryParam(URL *url.URL, queryParams map[string]string) string {
 func AddVariableToURL(URL, variables string) (string, error) {
 	url, err := ReplaceVariablesInURL(
 		URL,
-		ParseHeader(variables),
+		ParseKeyValueText(variables),
 	)
 
 	if err != nil {

@@ -160,7 +160,7 @@ func (tm *TabManager) showRequestInfo(id string) {
 	c, err := utils.ParseUrl(
 		tab.Variables,
 		tab.URL,
-		utils.ParseHeader(tab.QueryParams),
+		utils.ParseQueryParams(tab.QueryParams),
 		utils.ParsePathParams(tab.PathParams),
 	)
 
