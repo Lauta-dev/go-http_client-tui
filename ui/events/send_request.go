@@ -27,11 +27,11 @@ func (rs *RequestSender) SendRequest(
 ) {
 	_, selected := dropdown.GetCurrentOption()
 	body := bodyContent.GetText()
-	header := utils.ParseHeadera(headerPage.GetText(), utils.ParseHeader(varr.GetText()))
-	queryParams := utils.ParseHeader(queryParamPage.GetText())
+	header := utils.ParseHeaders(headerPage.GetText(), utils.ParseQueryParams(varr.GetText()))
+	queryParams := utils.ParseQueryParams(queryParamPage.GetText())
 	params := utils.ParsePathParams(pathParamPage.GetText())
 
-	url, err := utils.ReplaceVariablesInURL(formInput.GetText(), utils.ParseHeader(varr.GetText()))
+	url, err := utils.ReplaceVariablesInURL(formInput.GetText(), utils.ParseQueryParams(varr.GetText()))
 
 	if err != nil {
 		triggerErrorAfterRequest := &RequestError{
