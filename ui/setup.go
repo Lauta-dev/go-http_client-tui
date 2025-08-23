@@ -7,6 +7,7 @@ import (
 	"http_client/ui/events"
 	"http_client/ui/layout"
 	"http_client/ui/shotcust"
+	"http_client/utils"
 
 	"github.com/rivo/tview"
 )
@@ -35,6 +36,7 @@ func (setup *AppSetup) SetupPages(main *layout.Layout, cli *cmd.CliOptions) {
 	// Configurar pestaña inicial
 	setup.tabManager.CreateInitialTab(setup.appState.currentTab)
 	tabList.List.AddItem("Not Found", setup.appState.currentTab, 0, nil)
+	setup.tabManager.currentTabId = &setup.appState.currentTab
 
 	// Agregar páginas
 	setup.appState.mainPage.AddPage("main", main.Main, true, true)
@@ -70,6 +72,11 @@ func (setup *AppSetup) SetupShortcuts(main *layout.Layout, cli *cmd.CliOptions) 
 		RightPanel:             main.RightPanel.Container,
 		ChangeToFullScreen:     setup.appState.fullScreen,
 		ShowTabPage:            &setup.appState.showTabPage,
+		ExitsTab: func() bool {
+			_, exists := setup.appState.tabs[setup.appState.currentTab]
+			utils.LogDebug("Hi")
+			return exists
+		},
 
 		CopyFn: func() {
 			clipboard.Copy(setup.appState.contentToCopy)
@@ -102,4 +109,3 @@ func (setup *AppSetup) SetupShortcuts(main *layout.Layout, cli *cmd.CliOptions) 
 func (setup *AppSetup) SetupEventHandlers(main *layout.Layout) {
 	setup.tabManager.SetupTabListHandlers(main)
 }
-
