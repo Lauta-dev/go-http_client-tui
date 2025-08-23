@@ -11,6 +11,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/google/uuid"
+	"github.com/rivo/tview"
 )
 
 // TODO: Hacer un correcto formateo de los items, si se añade uno ya tenga el estilos "[200] - CustomName"
@@ -21,7 +22,8 @@ import (
 
 // TabManager maneja todas las operaciones relacionadas con pestañas
 type TabManager struct {
-	appState *AppState
+	appState     *AppState
+	currentTabId *string
 }
 
 // NewTabManager crea un nuevo manejador de pestañas
@@ -260,6 +262,17 @@ func (tm *TabManager) CreateNewTab() {
 	tm.appState.tabList.AddItem(" "+id+" ", id, 0, nil)
 }
 
+// DelTabState Eliminar el tab
+func (tm *TabManager) DelTabState(id string, list *tview.List, listId int) {
+	if _, e := tm.appState.tabs[tm.appState.currentTab]; !e {
+		return
+	}
+
+	delete(tm.appState.tabs, id)
+	list.RemoveItem(listId)
+	tm.appState.currentTab = ""
+}
+
 // SetupTabListHandlers configura los manejadores de eventos para la lista de pestañas
 func (tm *TabManager) SetupTabListHandlers(main *layout.Layout) {
 
@@ -301,6 +314,8 @@ func (tm *TabManager) SetupTabListHandlers(main *layout.Layout) {
 
 		tabId = secondaryText
 		id = index
+
+		tm.currentTabId = &tabId
 	})
 
 	// Cambia la información de la Request al cambiar de item
@@ -315,6 +330,9 @@ func (tm *TabManager) SetupTabListHandlers(main *layout.Layout) {
 		switch event.Rune() {
 		case 'a':
 			tm.CreateNewTab()
+
+		case 'x':
+			tm.DelTabState(tabId, list, id)
 		case 'e':
 
 			if tabId == "" {
