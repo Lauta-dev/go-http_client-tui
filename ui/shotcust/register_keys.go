@@ -20,6 +20,7 @@ type Shortcuts struct {
 	ShowRequestHistoryPage bool
 	ChangeToFullScreen     bool
 	ShowTabPage            *bool
+	ExitsTab               func() bool
 }
 
 func (s *Shortcuts) RegisterKeys() {
@@ -75,7 +76,12 @@ func (s *Shortcuts) RegisterKeys() {
 			}
 
 		case tcell.KeyF3:
+			if !s.ExitsTab() {
+				return nil
+			}
+
 			if *s.ShowTabPage {
+
 				*s.ShowTabPage = false
 				s.MainPage.SwitchToPage("main")
 			} else {
