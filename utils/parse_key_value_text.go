@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+
+
 // ParseKeyValueText parsea configuración HTTP desde texto key:value.
 func ParseKeyValueText(keyValueText string) map[string]string {
 	table := make(map[string]string)
