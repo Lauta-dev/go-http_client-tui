@@ -21,6 +21,7 @@ Un cliente HTTP moderno con **Interfaz de Usuario en Terminal (TUI)** construido
 ## Comandos CLI
 - **--env-file** | **-env-file**: Importa un archivo `.env`
 - **--help** | **-help**: Muestra la ayuda
+-- **--activate-history** | **-activate-history**: Guarda las peticiones 
 
 ## Instalación
 
@@ -41,6 +42,7 @@ go build -o http-client .
 |-------|--------|
 | `F1` | Ayuda |
 | `F2` | Peticiones |
+| `F3` | Pestañas |
 | `Alt+F` | Pantalla completa |
 | `Alt+B` | Vista Body |
 | `Alt+Q` | Vista Query Params |
@@ -59,6 +61,13 @@ go build -o http-client .
 | `d` | Eliminar elemento |
 | `j` | Cambiar a la vista de lista |
 | `k` | Cambiar a la vista de response |
+
+### Controles para la pestaña de sesiones
+| Tecla | Acción |
+|-------|--------|
+| `e` | Editar nombre de la sesion |
+| `esc` | Saliar de la vista para editar |
+| `x` | Eliminar item de la lista |
 
 ## Uso Rápido
 
