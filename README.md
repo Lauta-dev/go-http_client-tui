@@ -1,4 +1,4 @@
-<h1 align="center">HTTP Client TUI</h1>
+<h1 align="center">HTTPTUI</h1>
 
 ![Captura de pantalla](./public/screenshot.png) 
 [![Go](https://img.shields.io/badge/Go-1.18+-00ADD8?style=for-the-badge&logo=go)](https://golang.org/)
